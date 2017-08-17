@@ -93,3 +93,6 @@ ENV/
 
 # IDEA
 .idea/
+
+# Vim
+*.swp

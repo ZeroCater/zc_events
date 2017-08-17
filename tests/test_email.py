@@ -27,9 +27,7 @@ class EmailTests(TestCase):
         with self.assertRaises(Exception):
             self.event_client.send_email()
 
-    @mock.patch('zc_events.email.save_string_contents_to_s3')
-    @mock.patch('zc_events.client.EventClient.emit_microservice_email_notification')
-    def test_send_email(self, mock_emit_event, mock_save_string_contents_to_s3):
+    def _basic_email_test(self, mock_emit_event, mock_save_string_contents_to_s3):
         self.event_client.send_email(**self.send_email_kwargs)
 
         mock_emit_event.assert_called_once()
@@ -39,6 +37,33 @@ class EmailTests(TestCase):
             self.assertTrue(expected_arg in event_args)
 
         self.assertTrue(event_args['task_id'])
+
+        return event_args
+
+    @mock.patch('zc_events.email.save_string_contents_to_s3')
+    @mock.patch('zc_events.client.EventClient.emit_microservice_email_notification')
+    def test_send_email(self, mock_emit_event, mock_save_string_contents_to_s3):
+        self._basic_email_test(mock_emit_event, mock_save_string_contents_to_s3)
+
+    @mock.patch('zc_events.email.save_string_contents_to_s3')
+    @mock.patch('zc_events.client.EventClient.emit_microservice_email_notification')
+    def test_send_email_default_not_transactional(self, mock_emit_event, mock_save_string_contents_to_s3):
+        event_args = self._basic_email_test(mock_emit_event, mock_save_string_contents_to_s3)
+        self.assertFalse(event_args['is_transactional'])
+
+    @mock.patch('zc_events.email.save_string_contents_to_s3')
+    @mock.patch('zc_events.client.EventClient.emit_microservice_email_notification')
+    def test_send_email_that_is_transactional(self, mock_emit_event, mock_save_string_contents_to_s3):
+        self.send_email_kwargs['is_transactional'] = True
+        event_args = self._basic_email_test(mock_emit_event, mock_save_string_contents_to_s3)
+        self.assertTrue(event_args['is_transactional'])
+
+    @mock.patch('zc_events.email.save_string_contents_to_s3')
+    @mock.patch('zc_events.client.EventClient.emit_microservice_email_notification')
+    def test_send_email_that_is_not_transactional(self, mock_emit_event, mock_save_string_contents_to_s3):
+        self.send_email_kwargs['is_transactional'] = False
+        event_args = self._basic_email_test(mock_emit_event, mock_save_string_contents_to_s3)
+        self.assertFalse(event_args['is_transactional'])
 
     @mock.patch('zc_events.email.save_string_contents_to_s3')
     @mock.patch('zc_events.client.EventClient.emit_microservice_email_notification')

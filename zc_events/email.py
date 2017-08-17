@@ -22,7 +22,8 @@ def generate_s3_content_key(s3_folder_name, content_type, content_name=''):
 
 def generate_email_data(email_uuid, from_email=None, to=None, cc=None, bcc=None, reply_to=None, subject=None,
                         plaintext_body=None, html_body=None, headers=None, files=None, attachments=None,
-                        user_id=None, resource_type=None, resource_id=None, unsubscribe_group=None, **kwargs):
+                        user_id=None, resource_type=None, resource_id=None, unsubscribe_group=None,
+                        is_transactional=False, **kwargs):
     """
     files:       A list of file paths
     attachments: A list of tuples of the format (filename, content_type, content)
@@ -82,7 +83,8 @@ def generate_email_data(email_uuid, from_email=None, to=None, cc=None, bcc=None,
         'user_id': user_id,
         'resource_type': resource_type,
         'resource_id': resource_id,
-        'task_id': str(email_uuid)
+        'task_id': str(email_uuid),
+        'is_transactional': is_transactional
     }
 
     if unsubscribe_group:
