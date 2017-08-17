@@ -21,7 +21,7 @@ setup(
     author='ZeroCater',
     author_email='tech@zerocater.com',
     url='https://github.com/ZeroCater/zc_events',
-    download_url='https://github.com/ZeroCater/zc_events/tarball/0.2.2',
+    download_url='https://github.com/ZeroCater/zc_events/tarball/0.2.3',
     license='MIT',
     packages=get_packages('zc_events'),
     classifiers=[
