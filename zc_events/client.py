@@ -46,7 +46,7 @@ class MethodNotAllowed(Exception):
 class EventClient(object):
 
     def __init__(self):
-        pool = redis.ConnectionPool().from_url(settings.REDIS_URL, db=0)
+        pool = redis.ConnectionPool().from_url(settings.EVENTS_REDIS_URL, db=0)
         self.redis_client = redis.Redis(connection_pool=pool)
 
         pika_params = pika.URLParameters(settings.BROKER_URL)

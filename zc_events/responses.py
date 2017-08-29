@@ -156,7 +156,8 @@ class EventRequestsMock(object):
         return match
 
     def _has_event_match(self, match, **kwargs):
-        if str(match.get('pk')) != str(kwargs.get('id')):
+        pk = kwargs.get('id', None) or kwargs.get('pk', None)
+        if str(match.get('pk')) != str(pk):
             return False
 
         if match.get('query_string') and kwargs.get('query_string') and \
