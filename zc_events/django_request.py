@@ -32,7 +32,12 @@ def create_django_request_object(roles, query_string, method, user_id=None, body
         jwt_payload['id'] = user_id
 
     request = HttpRequest()
+
+    # For Django < 1.9
     request.GET = QueryDict(query_string)
+
+    # For Django >= 1.10
+    request.query_params = QueryDict(query_string)
 
     if body:
         request.read = lambda: ujson.dumps(body)
