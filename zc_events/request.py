@@ -91,4 +91,4 @@ class RemoteResourceListWrapper(list):
         self.add_items_from_data(included)
 
     def add_items_from_data(self, included):
-        map(lambda x: self.append(RemoteResourceWrapper(x, included)), self.data)
+        [self.append(RemoteResourceWrapper(x, included)) for x in self.data]
