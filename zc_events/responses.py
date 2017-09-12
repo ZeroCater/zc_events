@@ -6,7 +6,8 @@ import inspect
 import ujson as json_module
 import re
 import six
-import urllib
+
+from six.moves.urllib.parse import unquote
 
 from collections import namedtuple, Sequence, Sized
 from functools import update_wrapper
@@ -161,7 +162,7 @@ class EventRequestsMock(object):
             return False
 
         if match.get('query_string') and kwargs.get('query_string') and \
-                match['query_string'] != urllib.unquote(kwargs['query_string']):
+                match['query_string'] != unquote(kwargs['query_string']):
             return False
 
         if match.get('related_resource') != kwargs.get('related_resource'):

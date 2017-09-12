@@ -3,12 +3,13 @@ from __future__ import division
 import logging
 import math
 import ujson
-import urllib
 import uuid
-
 import pika
 import pika_pool
 import redis
+
+from six.moves.urllib.parse import urlencode
+
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
 from inflection import underscore
@@ -240,7 +241,7 @@ class EventClient(object):
             params['page_size'] = page_size
 
         if params:
-            query_string = urllib.urlencode(params)
+            query_string = urlencode(params)
 
         event = self.async_resource_request(resource_type, resource_id=pk, user_id=user_id,
                                             query_string=query_string, method=method,
