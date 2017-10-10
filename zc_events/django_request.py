@@ -33,6 +33,10 @@ def create_django_request_object(roles, query_string, method, user_id=None, body
 
     request = HttpRequest()
 
+    # This is immediately after initializing request since setting the encoding
+    #   property will delete .GET from the object
+    request.encoding = 'utf-8'
+
     # For Django < 1.9
     request.GET = QueryDict(query_string)
 
@@ -42,7 +46,6 @@ def create_django_request_object(roles, query_string, method, user_id=None, body
     if body:
         request.read = lambda: ujson.dumps(body)
 
-    request.encoding = 'utf-8'
     request.method = method.upper()
     request.META = {
         'HTTP_AUTHORIZATION': 'JWT {}'.format(jwt_encode_handler(jwt_payload)),
