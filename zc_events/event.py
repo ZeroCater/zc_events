@@ -52,7 +52,7 @@ class RequestEvent(Event):
         if not result:
             raise RequestTimeout
 
-        self._response = ujson.loads(zlib.decompress(result[1]))
+        self._response = ujson.loads(zlib.decompress(result[1]).decode('utf-8'))
         self._wait = True
 
         return self._response

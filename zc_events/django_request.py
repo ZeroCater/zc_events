@@ -16,7 +16,7 @@ def structure_response(status, data):
     return zlib.compress(ujson.dumps({
         'status': status,
         'body': data
-    }))
+    }).encode('utf-8'))
 
 
 def create_django_request_object(roles, query_string, method, user_id=None, body=None, http_host=None):
