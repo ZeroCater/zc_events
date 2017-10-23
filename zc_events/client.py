@@ -63,13 +63,11 @@ class EventClient(object):
         self.events_exchange = settings.EVENTS_EXCHANGE
         self.notifications_exchange = getattr(settings, 'NOTIFICATIONS_EXCHANGE', None)
 
-    def emit_microservice_message(self, exchange, routing_key, event_type, priority=0, *args, **kwargs):
+    def emit_microservice_message(self, exchange, routing_key, event_type, task, priority=0, *args, **kwargs):
         task_id = str(uuid.uuid4())
 
         keyword_args = {'task_id': task_id}
         keyword_args.update(kwargs)
-
-        task = 'microservice.notification' if routing_key else 'microservice.event'
 
         message = {
             'task': task,
@@ -111,15 +109,15 @@ class EventClient(object):
         return response
 
     def emit_microservice_event(self, event_type, *args, **kwargs):
-        return self.emit_microservice_message(self.events_exchange, 'microservice-event', event_type, *args, **kwargs)
+        return self.emit_microservice_message(self.events_exchange, 'microservice-event', event_type, 'microservice.event', *args, **kwargs)
 
     def emit_microservice_email_notification(self, event_type, *args, **kwargs):
         return self.emit_microservice_message(
-            self.notifications_exchange, 'microservice.notification.email', event_type, *args, **kwargs)
+            self.notifications_exchange, 'microservice.notification.email', event_type, 'microservice.notification', *args, **kwargs)
 
     def emit_microservice_text_notification(self, event_type, *args, **kwargs):
         return self.emit_microservice_message(
-            self.notifications_exchange, 'microservice.notification.text', event_type, *args, **kwargs)
+            self.notifications_exchange, 'microservice.notification.text', event_type, 'microservice.notification', *args, **kwargs)
 
     def wait_for_response(self, response_key):
         response = self.redis_client.blpop(response_key, 60)
