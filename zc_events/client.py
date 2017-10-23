@@ -111,7 +111,7 @@ class EventClient(object):
         return response
 
     def emit_microservice_event(self, event_type, *args, **kwargs):
-        return self.emit_microservice_message(self.events_exchange, '', event_type, *args, **kwargs)
+        return self.emit_microservice_message(self.events_exchange, 'microservice-event', event_type, *args, **kwargs)
 
     def emit_microservice_email_notification(self, event_type, *args, **kwargs):
         return self.emit_microservice_message(
