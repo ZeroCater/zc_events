@@ -47,7 +47,7 @@ def create_django_request_object(roles, query_string, method, user_id=None, body
     request._read_started = False
 
     if body:
-        request.read = lambda: ujson.dumps(body)
+        request.raw_body = body
 
     request.method = method.upper()
     request.META = {
