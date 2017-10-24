@@ -43,6 +43,9 @@ def create_django_request_object(roles, query_string, method, user_id=None, body
     # For Django >= 1.10
     request.query_params = QueryDict(query_string)
 
+    # For Django REST Framework >= 3.4.7
+    request._read_started = False
+
     if body:
         request.read = lambda: ujson.dumps(body)
 
