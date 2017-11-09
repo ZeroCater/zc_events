@@ -16,7 +16,7 @@ def structure_response(status, data):
     return zlib.compress(ujson.dumps({
         'status': status,
         'body': data
-    }))
+    }).encode('utf-8'))
 
 
 def create_django_request_object(roles, query_string, method, user_id=None, body=None, http_host=None):
@@ -43,8 +43,11 @@ def create_django_request_object(roles, query_string, method, user_id=None, body
     # For Django >= 1.10
     request.query_params = QueryDict(query_string)
 
+    # For Django REST Framework >= 3.4.7
+    request._read_started = False
+
     if body:
-        request.read = lambda: ujson.dumps(body)
+        request.raw_body = body
 
     request.method = method.upper()
     request.META = {

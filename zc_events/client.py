@@ -3,8 +3,8 @@ from __future__ import division
 import logging
 import math
 import ujson
-import urllib
 import uuid
+from six.moves import urllib
 
 import pika
 import pika_pool
@@ -240,7 +240,7 @@ class EventClient(object):
             params['page_size'] = page_size
 
         if params:
-            query_string = urllib.urlencode(params)
+            query_string = urllib.parse.urlencode(params)
 
         event = self.async_resource_request(resource_type, resource_id=pk, user_id=user_id,
                                             query_string=query_string, method=method,
