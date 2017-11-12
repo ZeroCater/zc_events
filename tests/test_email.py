@@ -2,6 +2,7 @@ import mock
 from unittest import TestCase
 
 from zc_events.client import EventClient
+from zc_events.aws import S3IOException
 
 
 class EmailTests(TestCase):
@@ -22,10 +23,9 @@ class EmailTests(TestCase):
                                     'headers', 'attachments_keys']
         self.event_client = EventClient()
 
-    @mock.patch('boto.connect_s3', side_effect=Exception)
-    def test_send_email__connection_fail(self, mock_connect_s3):
-        with self.assertRaises(Exception):
-            self.event_client.send_email()
+    def test_send_email__connection_fail_with_bad_credentials(self):
+        with self.assertRaises(S3IOException):
+            self.event_client.send_email(**self.send_email_kwargs)
 
     def _basic_email_test(self, mock_emit_event, mock_save_string_contents_to_s3):
         self.event_client.send_email(**self.send_email_kwargs)
