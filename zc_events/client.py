@@ -2,12 +2,12 @@ from __future__ import division
 
 import logging
 import math
+import time
 import ujson
 import uuid
 from six.moves import urllib
 
 import pika
-import pika_pool
 import redis
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
@@ -45,23 +45,25 @@ class MethodNotAllowed(Exception):
 
 class EventClient(object):
 
-    def __init__(self):
+    def __init__(self, pika_recycle_sec=30):
         pool = redis.ConnectionPool().from_url(settings.EVENTS_REDIS_URL, db=0)
         self.redis_client = redis.Redis(connection_pool=pool)
 
-        pika_params = pika.URLParameters(settings.BROKER_URL)
-        pika_params.socket_timeout = 5
-        self.pika_pool = pika_pool.QueuedPool(
-            create=lambda: pika.BlockingConnection(parameters=pika_params),
-            max_size=10,
-            max_overflow=10,
-            timeout=10,
-            recycle=3600,
-            stale=45,
-        )
+        self._pika_connection = None
+        self._pika_connection_last_refresh = None
+        self.pika_recycle_sec = pika_recycle_sec
 
         self.events_exchange = settings.EVENTS_EXCHANGE
         self.notifications_exchange = getattr(settings, 'NOTIFICATIONS_EXCHANGE', None)
+
+    @property
+    def pika_connection(self):
+        if not self._pika_connection or (time.time() - self._pika_connection_last_refresh) > self.pika_recycle_sec:
+            pika_params = pika.URLParameters(settings.BROKER_URL)
+            pika_params.socket_timeout = 5
+            self._pika_connection = pika.BlockingConnection(parameters=pika_params)
+            self._pika_connection_last_refresh = time.time()
+        return self._pika_connection
 
     def emit_microservice_message(self, exchange, routing_key, event_type, priority=0, *args, **kwargs):
         task_id = str(uuid.uuid4())
@@ -88,18 +90,19 @@ class EventClient(object):
         queue_arguments = {
             'x-max-priority': 10
         }
-        with self.pika_pool.acquire() as cxn:
-            cxn.channel.queue_declare(queue=event_queue_name, durable=True, arguments=queue_arguments)
-            response = cxn.channel.basic_publish(
-                exchange,
-                routing_key,
-                event_body,
-                pika.BasicProperties(
-                    content_type='application/json',
-                    content_encoding='utf-8',
-                    priority=priority
-                )
+
+        cxn = self.pika_connection.channel()
+        cxn.queue_declare(queue=event_queue_name, durable=True, arguments=queue_arguments)
+        response = cxn.basic_publish(
+            exchange,
+            routing_key,
+            event_body,
+            pika.BasicProperties(
+                content_type='application/json',
+                content_encoding='utf-8',
+                priority=priority
             )
+        )
 
         if not response:
             logger.info(
