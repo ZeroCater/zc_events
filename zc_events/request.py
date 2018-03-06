@@ -92,3 +92,16 @@ class RemoteResourceListWrapper(list):
 
     def add_items_from_data(self, included):
         [self.append(RemoteResourceWrapper(x, included)) for x in self.data]
+
+
+class Request:
+    """Represents a request to the method handling the call.
+
+    Attributes:
+        data (dict or None): The data being transmitted by the client.
+        response_key (str or None): The response key used to make sure the client receives the response.
+        id (str): An automatically generated unique request id.
+    """
+    def __init__(self, request):
+        for key, value in request.items():
+            setattr(self, key, value)

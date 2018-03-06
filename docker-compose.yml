@@ -1,0 +1,72 @@
+version: '3'
+
+services:
+  redis:
+    image: redis:alpine
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - 8080:15672
+  worker3:
+    build:
+      context: .
+      dockerfile: Dockerfile-py3
+    volumes:
+      - .:/code
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - DJANGO_SETTINGS_MODULE=examples.settings
+      - ZC_EVENTS_SETTINGS=examples.settings
+      - C_FORCE_ROOT=1
+    depends_on:
+      - redis
+      - rabbitmq
+    command: bash -c "celery -A examples.worker_example worker --loglevel=info"
+  client3:
+    build:
+      context: .
+      dockerfile: Dockerfile-py3
+    volumes:
+      - .:/code
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - DJANGO_SETTINGS_MODULE=examples.settings
+      - ZC_EVENTS_SETTINGS=examples.settings
+      - C_FORCE_ROOT=1
+    depends_on:
+      - redis
+      - rabbitmq
+      - worker3
+    command: python3 examples/client_example.py
+  worker2:
+    build:
+      context: .
+      dockerfile: Dockerfile-py2
+    volumes:
+      - .:/code
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - DJANGO_SETTINGS_MODULE=examples.settings
+      - ZC_EVENTS_SETTINGS=examples.settings
+      - C_FORCE_ROOT=1
+    depends_on:
+      - redis
+      - rabbitmq
+    command: bash -c "celery -A examples.worker_example worker --loglevel=info"
+  client2:
+    build:
+      context: .
+      dockerfile: Dockerfile-py2
+    volumes:
+      - .:/code
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - DJANGO_SETTINGS_MODULE=examples.settings
+      - ZC_EVENTS_SETTINGS=examples.settings
+      - C_FORCE_ROOT=1
+    depends_on:
+      - redis
+      - rabbitmq
+      - worker2
+    command: python examples/client_example.py
+

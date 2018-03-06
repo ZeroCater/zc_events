@@ -3,7 +3,7 @@ from __future__ import division
 import ujson
 import math
 
-from django.conf import settings
+from zc_events.config import settings
 
 from zc_events.utils import notification_event_payload
 

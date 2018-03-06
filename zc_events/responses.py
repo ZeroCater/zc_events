@@ -24,6 +24,35 @@ def wrapper%(signature)s:
 """
 
 
+class Response:
+    """Represents a response from an event, inspired by the requests library.
+
+    When the client performs an action that generates a response, that response
+    is represented by this class.
+
+    Example:
+    ```
+    r = client.get('add', data={'x': 1, 'y': 2})
+    assert r.has_errors is False
+    assert r.data == 3
+    assert r.errors == []
+
+    r = client.get('add', data={'x': 1})
+    assert r.has_errors is True
+    assert r.data is None
+    assert r.errors = .errors == [{'type': 'KeyError', 'message': "'y'"}]
+    ```
+
+    Attributes:
+        data (dict, object or None): The data returned by call, if no errors occur.
+        has_errors (bool): If an error was captured, it is set to True.
+        errors (list of dicts): Holds the errors that were thrown, if any.
+    """
+    def __init__(self, response):
+        for key, value in response.items():
+            setattr(self, key, value)
+
+
 def get_wrapped(func, wrapper_template, evaldict):
     # Preserve the argspec for the wrapped function so that testing
     # tools such as pytest can continue to use their fixture injection.
