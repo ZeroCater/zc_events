@@ -3,7 +3,7 @@ import uuid
 import boto3
 from botocore.exceptions import ClientError
 
-from six import reraise as raise_
+from six import raise_from
 
 from django.conf import settings
 
@@ -32,8 +32,8 @@ def save_string_contents_to_s3(stringified_data, aws_bucket_name, content_key=No
         return content_key
     except ClientError as error:
         msg = 'Failed to save contents to S3. aws_bucket_name: {}, content_key: {}, ' \
-              'error_message: {}'.format(aws_bucket_name, content_key, error.message)
-        raise_(S3IOException(msg), None, sys.exc_info()[2])
+              'error: {}'.format(aws_bucket_name, content_key, error)
+        raise_from(S3IOException(msg), error)
 
 
 def save_file_contents_to_s3(filepath, aws_bucket_name, content_key=None,
@@ -56,8 +56,8 @@ def save_file_contents_to_s3(filepath, aws_bucket_name, content_key=None,
         return content_key
     except ClientError as error:
         msg = 'Failed to save contents to S3. filepath: {}, aws_bucket_name: {}, content_key: {}, ' \
-              'error_message: {}'.format(filepath, aws_bucket_name, content_key, error.message)
-        raise_(S3IOException(msg), None, sys.exc_info()[2])
+              'error: {}'.format(filepath, aws_bucket_name, content_key, error)
+        raise_from(S3IOException(msg), error)
 
 
 def read_s3_file_as_string(aws_bucket_name, content_key, delete=False,
@@ -82,5 +82,5 @@ def read_s3_file_as_string(aws_bucket_name, content_key, delete=False,
         return output
     except ClientError as error:
         msg = 'Failed to save contents to S3. aws_bucket_name: {}, content_key: {}, delete: {}, ' \
-              'error_message: {}'.format(aws_bucket_name, content_key, delete, error.message)
-        raise_(S3IOException(msg), None, sys.exc_info()[2])
+              'error: {}'.format(aws_bucket_name, content_key, delete, error)
+        raise_from(S3IOException(msg), error)
