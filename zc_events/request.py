@@ -94,7 +94,7 @@ class RemoteResourceListWrapper(list):
         [self.append(RemoteResourceWrapper(x, included)) for x in self.data]
 
 
-class Request:
+class Request(object):
     """Represents a request to the method handling the call.
 
     Attributes:

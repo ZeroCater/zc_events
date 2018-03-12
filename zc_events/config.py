@@ -16,10 +16,9 @@ import os
 import uuid
 try:
     from django.conf import settings as django_settings
-except:
+except ImportError:
     django_settings = None
 
-_DOES_NOT_EXIST = str(uuid.uuid4())
 
 logger = logging.getLogger(__name__)
 
@@ -55,10 +54,10 @@ class _LazySettings:
                         )
                     )
                     raise e
-        value = getattr(self._settings, name, _DOES_NOT_EXIST)
-        if value == _DOES_NOT_EXIST:
-            raise AttributeError()
-        return value
+        if hasattr(self._settings, name):
+            return getattr(self._settings, name)
+        else:
+            raise AttributeError('zc_events could not find {name} in settings.'.format(name=name))
 
 
 settings = _LazySettings()

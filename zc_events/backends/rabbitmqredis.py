@@ -17,10 +17,6 @@ _HIGH_PRIORITY = 9
 logger = logging.getLogger(__name__)
 
 
-def _noop(request):
-    pass
-
-
 def _format_exception_response(exception_name, exception_msg, exception_trace):
     return {
         'data': None,
@@ -60,32 +56,35 @@ def dispatch_task(name, data):
     """
     logger.info('zc_events received name={name} data={data}'.format(name=name, data=data))
     request = Request(data)
-    func = settings.JOB_MAPPING.get(name, _noop)
-    try:
-        response = {
-            'data': func(request),
-            'has_errors': False,
-            'errors': []
-        }
-    except Exception as e:
-        msg = str(e)
-        ex_type = e.__class__.__name__
-        trace = traceback.format_exc()
-        logger.exception(
-            'zc_events dispatched func threw an exception: name={name} data={data} '
-            'exception={ex} message={msg} trace={trace}'.format(
-                name=name,
-                data=data,
-                ex=ex_type,
-                msg=msg,
-                trace=trace
+    func = settings.JOB_MAPPING.get(name)
+    if not func:
+        log.info('zc_events did not find name={name}'.format(name=name))
+    else:
+        try:
+            response = {
+                'data': func(request),
+                'has_errors': False,
+                'errors': []
+            }
+        except Exception as e:
+            msg = str(e)
+            ex_type = e.__class__.__name__
+            trace = traceback.format_exc()
+            logger.exception(
+                'zc_events dispatched func threw an exception: name={name} data={data} '
+                'exception={ex} message={msg} trace={trace}'.format(
+                    name=name,
+                    data=data,
+                    ex=ex_type,
+                    msg=msg,
+                    trace=trace
+                )
             )
-        )
-        response = _format_exception_response(ex_type, msg, trace)
-    backend = settings.RPC_BACKEND
-    logger.info('zc_events finished name={name} data={data} response={response}'.format(
-        name=name, data=data, response=response))
-    backend.respond(request.response_key, response)
+            response = _format_exception_response(ex_type, msg, trace)
+        backend = settings.RPC_BACKEND
+        logger.info('zc_events finished name={name} data={data} response={response}'.format(
+            name=name, data=data, response=response))
+        backend.respond(request.response_key, response)
 
 
 def _get_raw_response(redis_client, response_key):

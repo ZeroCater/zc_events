@@ -24,7 +24,7 @@ def wrapper%(signature)s:
 """
 
 
-class Response:
+class Response(object):
     """Represents a response from an event, inspired by the requests library.
 
     When the client performs an action that generates a response, that response

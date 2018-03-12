@@ -98,7 +98,7 @@ class EventClient(object):
     def call(self, key, data={}, headers={}):
         """Call a function in rpc-style a way and wait for the response.
 
-        This is a thing wrapper around `post`, and is provided to make code readable in situations
+        This is a thin wrapper around `post`, and is provided to make code readable in situations
         where the name `call` may make more sense.
 
         Args:
@@ -114,8 +114,8 @@ class EventClient(object):
     def call_no_wait(self, key, data={}, headers={}):
         """Call a function in rpc-style a way, without waiting for any response.
 
-        This is a thing wrapper around `post_no_wait`, and is provided to make code readable in situations
-        where the name `call` may make more sense.
+        This is a thin wrapper around `post_no_wait`, and is provided to make code readable in situations
+        where the name `call_no_wait` may make more sense.
 
         Args:
             key (str): The key used to lookup the function to be called.
