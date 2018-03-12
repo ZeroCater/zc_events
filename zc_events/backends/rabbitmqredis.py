@@ -58,7 +58,8 @@ def dispatch_task(name, data):
     request = Request(data)
     func = settings.JOB_MAPPING.get(name)
     if not func:
-        log.info('zc_events did not find name={name}'.format(name=name))
+        logger.info('zc_events did not find name={name}'.format(name=name))
+        return (False, False)
     else:
         try:
             response = {
@@ -84,7 +85,7 @@ def dispatch_task(name, data):
         backend = settings.RPC_BACKEND
         logger.info('zc_events finished name={name} data={data} response={response}'.format(
             name=name, data=data, response=response))
-        backend.respond(request.response_key, response)
+        return (backend.respond(request.response_key, response), True)
 
 
 def _get_raw_response(redis_client, response_key):
@@ -113,6 +114,12 @@ def _get_raw_response(redis_client, response_key):
         )
         response = json.dumps(_format_exception_response(ex_type, msg, trace))
     return response
+
+
+def _get_response(redis_client, response_key):
+    response = _get_raw_response(redis_client, response_key)
+    json_response = json.loads(response)
+    return Response(json_response)
 
 
 def _respond(redis_client, response_key, data):
@@ -260,9 +267,7 @@ class RabbitMqFanoutBackend:
             _HIGH_PRIORITY,
             json.dumps(data)
         )
-        response = _get_raw_response(self._redis_client, data['response_key'])
-        json_response = json.loads(response)
-        return Response(json_response)
+        return _get_response(self._redis_client, data['response_key'])
 
     def respond(self, response_key, data):
         """
