@@ -1,9 +1,8 @@
 machine:
   services:
     - redis
-dependencies:
-  override:
-    - pip install -r requirements-dev.txt
+  post:
+    - pyenv global 2.7.12 3.6.2
 test:
   override:
-    - pytest --ds=tests.settings
+    - tox
