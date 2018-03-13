@@ -1,5 +1,5 @@
 import re
-from django.conf import settings
+from zc_events.config import settings
 
 
 class TaskRouter(object):

@@ -1,3 +1,10 @@
+try:
+    from django.core.exceptions import ImproperlyConfigured
+except ImportError:
+    class ImproperlyConfigured(Exception):
+        pass
+
+
 class RequestTimeout(Exception):
     status_code = 408
     default_detail = 'Request timed out.'

@@ -1,8 +1,66 @@
 # zc_events
 
-# Event Based Communication
+# Long term plan
 
-In order to send and receive marketplace events through RabbitMQ there is some configuration that needs to occur at the service level.
+The long term plan is to simplify this library as much as possible. This will be done in several stages:
+
+- [x] Add http verbs to `EventClient`
+- [x] Deprecate all other methods on `EventClient`, except `email` related ones.
+- [x] Decouple `EventClient` from any particular backend to send events.
+- [ ] Move over sending events through Django Rest Framework.
+- [ ] Move over sending specific `email` type of events.
+- [ ] Create a `celery` backend to stop placing things directly on rabbitmq, with sane defaults.
+- [ ] Major version change that removes deprecated methods and classes.
+
+Each of the above represent potential releases.
+
+## Vision
+
+This library should be as simple as possible, with a standard interface that is decoupled from the transport mechanism underlying any event system (RabbitMQ, Celery, Redis, HTTPS, etc.).
+
+## Example based goals
+
+```python
+# Server side
+def add(request):
+    data = request.data
+    return {
+        'answer': data['x'] + data['y']
+    }
+```
+
+### Fire and forget
+
+```python
+# Client side
+zc_events.post_no_wait('add', data={'x': 1, 'y': 1})
+```
+
+### Wait for a response
+
+```python
+# Client side
+response = zc_events.get('add', data={'x': 1, 'y': 1})
+response.data  # {'answer': 2}
+response.has_errors  # False
+```
+
+
+### Get errors
+
+```python
+# Client side
+response = zc_events.get('add', data={'x': 1})
+response.data  # None
+response.has_errors  # True
+response.errors  # [{ 'type': 'KeyError', 'message': 'y' }]
+```
+
+## Working Example
+
+A working example can be found in the `examples` folder, and can be run via `docker-compose run client3` and `docker-compose run client2`.
+
+# Installation
 
 ## Settings changes
 

@@ -5,7 +5,7 @@ from botocore.exceptions import ClientError
 
 from six import raise_from
 
-from django.conf import settings
+from zc_events.config import settings
 
 
 class S3IOException(Exception):

@@ -9,16 +9,16 @@ from six.moves import urllib
 import pika
 import pika_pool
 import redis
-from django.conf import settings
-from django.core.exceptions import ImproperlyConfigured
+from zc_events.config import settings
 from inflection import underscore
 
 from zc_events.aws import save_string_contents_to_s3
 from zc_events.django_request import structure_response, create_django_request_object
 from zc_events.email import generate_email_data
 from zc_events.event import ResourceRequestEvent
-from zc_events.exceptions import EmitEventException
+from zc_events.exceptions import EmitEventException, ImproperlyConfigured
 from zc_events.utils import notification_event_payload
+from zc_events.backends import RabbitMqFanoutBackend
 
 SERVICE_ACTOR = 'service'
 ANONYMOUS_ACTOR = 'anonymous'
@@ -27,6 +27,21 @@ SERVICE_ROLES = [SERVICE_ACTOR]
 ANONYMOUS_ROLES = [ANONYMOUS_ACTOR]
 
 logger = logging.getLogger('django')
+
+_DEPRECATE_MESSAGE = "DEPRECATION WARNING: Use one of the HTTP verb methods instead"
+
+
+def _deprecated():
+    logger.warning(_DEPRECATE_MESSAGE)
+
+
+def _format_data_structure(data, headers, response_key=False):
+    return {
+        'data': data,
+        'id': str(uuid.uuid4()),
+        'headers': headers,
+        'response_key': str(uuid.uuid4()) if response_key else None
+    }
 
 
 class MethodNotAllowed(Exception):
@@ -44,6 +59,15 @@ class MethodNotAllowed(Exception):
 
 
 class EventClient(object):
+    """Used on the client side to send rpc-style events.
+
+    Non-deprecated methods are backend agnostic, and documented.
+
+    Note:
+        This is in a state of being upgraded, and is not totally backend agnostic yet.
+        In the next major release it will be backend agnostic, and will be removing many of the public methods,
+        but first we are providing the new methods in a back-wards compatible way.
+    """
 
     def __init__(self):
         pool = redis.ConnectionPool().from_url(settings.EVENTS_REDIS_URL, db=0)
@@ -62,8 +86,154 @@ class EventClient(object):
 
         self.events_exchange = settings.EVENTS_EXCHANGE
         self.notifications_exchange = getattr(settings, 'NOTIFICATIONS_EXCHANGE', None)
+        self._backend = RabbitMqFanoutBackend(
+            redis_client=self.redis_client,
+            pika_pool=self.pika_pool
+        )
+
+    def _format_and_make_call(self, key, data, headers, response_key, method):
+        formatted_data = _format_data_structure(data, headers, response_key)
+        return getattr(self._backend, method)(key, formatted_data)
+
+    def call(self, key, data={}, headers={}):
+        """Call a function in rpc-style a way and wait for the response.
+
+        This is a thin wrapper around `post`, and is provided to make code readable in situations
+        where the name `call` may make more sense.
+
+        Args:
+            key (str): The key used to lookup the function to be called.
+            data (dict, optional): The data to be sent to the remote function.
+            headers (dict, optional): Optional, http style, information to be sent to the remote function.
+
+        Returns:
+            Response: An object containing the response from the remove function.
+        """
+        return self.post(key, data=data, headers=headers)
+
+    def call_no_wait(self, key, data={}, headers={}):
+        """Call a function in rpc-style a way, without waiting for any response.
+
+        This is a thin wrapper around `post_no_wait`, and is provided to make code readable in situations
+        where the name `call_no_wait` may make more sense.
+
+        Args:
+            key (str): The key used to lookup the function to be called.
+            data (dict, optional): The data to be sent to the remote function.
+            headers (dict, optional): Optional, http style, information to be sent to the remote function.
+
+        Returns:
+            None
+        """
+        return self.post_no_wait(key, data=data, headers=headers)
+
+    def get(self, key, data={}, headers={}):
+        """Call a remote function in an analogous fashion to a GET http request, and wait for a response.
+
+        Args:
+            key (str): The key used to lookup the function to be called.
+            data (dict, optional): The data to be sent to the remote function.
+            headers (dict, optional): Optional, http style, information to be sent to the remote function.
+
+        Returns:
+            Response: An object containing the response from the remove function.
+        """
+        return self._format_and_make_call(
+            key, data, headers, True, 'get'
+        )
+
+    def put(self, key, data={}, headers={}):
+        """Call a remote function in an analogous fashion to a PUT http request, and wait for a response.
+
+        Args:
+            key (str): The key used to lookup the function to be called.
+            data (dict, optional): The data to be sent to the remote function.
+            headers (dict, optional): Optional, http style, information to be sent to the remote function.
+
+        Returns:
+            Response: An object containing the response from the remove function.
+        """
+        return self._format_and_make_call(
+            key, data, headers, True, 'put'
+        )
+
+    def put_no_wait(self, key, data={}, headers={}):
+        """Call a remote function in an analogous fashion to a PUT http request, without waiting for a response.
+
+        Args:
+            key (str): The key used to lookup the function to be called.
+            data (dict, optional): The data to be sent to the remote function.
+            headers (dict, optional): Optional, http style, information to be sent to the remote function.
+
+        Returns:
+            None
+        """
+        return self._format_and_make_call(
+            key, data, headers, False, 'put_no_wait'
+        )
+
+    def post(self, key, data={}, headers={}):
+        """Call a remote function in an analogous fashion to a POST http request, and wait for a response.
+
+        Args:
+            key (str): The key used to lookup the function to be called.
+            data (dict, optional): The data to be sent to the remote function.
+            headers (dict, optional): Optional, http style, information to be sent to the remote function.
+
+        Returns:
+            Response: An object containing the response from the remove function.
+        """
+        return self._format_and_make_call(
+            key, data, headers, True, 'post'
+        )
+
+    def post_no_wait(self, key, data={}, headers={}):
+        """Call a remote function in an analogous fashion to a POST http request, without waiting for a response.
+
+        Args:
+            key (str): The key used to lookup the function to be called.
+            data (dict, optional): The data to be sent to the remote function.
+            headers (dict, optional): Optional, http style, information to be sent to the remote function.
+
+        Returns:
+            None
+        """
+        return self._format_and_make_call(
+            key, data, headers, False, 'post_no_wait'
+        )
+
+    def delete(self, key, data={}, headers={}):
+        """Call a remote function in an analogous fashion to a DELETE http request, and wait for a response.
+
+        Args:
+            key (str): The key used to lookup the function to be called.
+            data (dict, optional): The data to be sent to the remote function.
+            headers (dict, optional): Optional, http style, information to be sent to the remote function.
+
+        Returns:
+            Response: An object containing the response from the remove function.
+        """
+        return self._format_and_make_call(
+            key, data, headers, True, 'delete'
+        )
+
+    def delete_no_wait(self, key, data={}, headers={}):
+        """Call a remote function in an analogous fashion to a DELETE http request, without waiting for a response.
+
+        Args:
+            key (str): The key used to lookup the function to be called.
+            data (dict, optional): The data to be sent to the remote function.
+            headers (dict, optional): Optional, http style, information to be sent to the remote function.
+
+        Returns:
+            None
+        """
+        return self._format_and_make_call(
+            key, data, headers, False, 'delete_no_wait'
+        )
 
     def emit_microservice_message(self, exchange, routing_key, event_type, priority=0, *args, **kwargs):
+        _deprecated()
         task_id = str(uuid.uuid4())
 
         keyword_args = {'task_id': task_id}
@@ -111,6 +281,7 @@ class EventClient(object):
         return response
 
     def emit_microservice_event(self, event_type, *args, **kwargs):
+        _deprecated()
         return self.emit_microservice_message(self.events_exchange, '', event_type, *args, **kwargs)
 
     def emit_microservice_email_notification(self, event_type, *args, **kwargs):

@@ -1,13 +1,6 @@
 import ujson
 import zlib
 
-try:
-    from zc_common.jwt_auth.utils import jwt_encode_handler
-except ImportError:
-    pass
-
-from django.http import HttpRequest, QueryDict
-
 
 def structure_response(status, data):
     """
@@ -24,6 +17,8 @@ def create_django_request_object(roles, query_string, method, user_id=None, body
     Create a Django HTTPRequest object with the appropriate attributes pulled
     from the event.
     """
+    from django.http import HttpRequest, QueryDict
+    from zc_common.jwt_auth.utils import jwt_encode_handler
     if not http_host:
         http_host = 'local.zerocater.com'
 
