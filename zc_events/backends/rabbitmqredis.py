@@ -173,7 +173,7 @@ def _format_data(data, method, key):
     }
 
 
-class RabbitMqFanoutBackend:
+class RabbitMqFanoutBackend(object):
     """A backend implementation using Rabbitmq fanout strategy and redis for responses.
 
     The intent for this backend is to use a Rabbitmq fanout strategy, with redis for responding quickly.
