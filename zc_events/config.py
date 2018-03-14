@@ -23,14 +23,13 @@ except ImportError:
 logger = logging.getLogger(__name__)
 
 
-class _LazySettings:
+class _LazySettings(object):
     """A lazy way to retrieve settings.
 
     This class makes it possible to import settings, but they are not evaluated until they are needed.
 
     Note:
-        If django is installed, it uses django's settings. If not, the it gets the settings from
-        whatever file is imported from the `ZC_EVENTS_SETTINGS` env. variable.
+        If `ZC_EVENTS_SETTINGS` is set then it uses that, if not it will try to use django's settings.
     """
 
     def __init__(self):
@@ -38,12 +37,9 @@ class _LazySettings:
 
     def __getattr__(self, name):
         if not self._settings:
-            if django_settings:
-                logger.debug('zc_events is using django settings')
-                self._settings = django_settings
-            else:
+            import_path = os.environ.get('ZC_EVENTS_SETTINGS')
+            if import_path:
                 logger.debug('zc_events could not use django settings, using ZC_EVENTS_SETTINGS')
-                import_path = os.environ.get('ZC_EVENTS_SETTINGS')
                 try:
                     self._settings = importlib.import_module(import_path)
                 except Exception as e:
@@ -54,6 +50,9 @@ class _LazySettings:
                         )
                     )
                     raise e
+            elif django_settings:
+                logger.debug('zc_events is using django settings')
+                self._settings = django_settings
         if hasattr(self._settings, name):
             return getattr(self._settings, name)
         else:
