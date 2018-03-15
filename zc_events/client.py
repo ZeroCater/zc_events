@@ -70,26 +70,54 @@ class EventClient(object):
     """
 
     def __init__(self):
-        pool = redis.ConnectionPool().from_url(settings.EVENTS_REDIS_URL, db=0)
-        self.redis_client = redis.Redis(connection_pool=pool)
+        self.__backend = None
+        self._redis_client = None
+        self._pika_pool = None
+        self._notifications_exchange = None
+        self._events_exchange = None
 
-        pika_params = pika.URLParameters(settings.BROKER_URL)
-        pika_params.socket_timeout = 5
-        self.pika_pool = pika_pool.QueuedPool(
-            create=lambda: pika.BlockingConnection(parameters=pika_params),
-            max_size=10,
-            max_overflow=10,
-            timeout=10,
-            recycle=3600,
-            stale=45,
-        )
+    @property
+    def _backend(self):
+        if not self.__backend:
+            self.__backend = RabbitMqFanoutBackend(
+                redis_client=self.redis_client,
+                pika_pool=self.pika_pool
+            )
+        return self.__backend
 
-        self.events_exchange = settings.EVENTS_EXCHANGE
-        self.notifications_exchange = getattr(settings, 'NOTIFICATIONS_EXCHANGE', None)
-        self._backend = RabbitMqFanoutBackend(
-            redis_client=self.redis_client,
-            pika_pool=self.pika_pool
-        )
+    @property
+    def redis_client(self):
+        if not self._redis_client:
+            pool = redis.ConnectionPool().from_url(settings.EVENTS_REDIS_URL, db=0)
+            self._redis_client = redis.Redis(connection_pool=pool)
+        return self._redis_client
+
+    @property
+    def pika_pool(self):
+        if not self._pika_pool:
+            pika_params = pika.URLParameters(settings.BROKER_URL)
+            pika_params.socket_timeout = 5
+            self._pika_pool = pika_pool.QueuedPool(
+                create=lambda: pika.BlockingConnection(parameters=pika_params),
+                max_size=10,
+                max_overflow=10,
+                timeout=10,
+                recycle=3600,
+                stale=45,
+            )
+        return self._pika_pool
+
+    @property
+    def notifications_exchange(self):
+        if not self._notifications_exchange:
+            self._notifications_exchange = getattr(settings, 'NOTIFICATIONS_EXCHANGE', None)
+        return self._notifications_exchange
+
+    @property
+    def events_exchange(self):
+        if not self._events_exchange:
+            self._events_exchange = settings.EVENTS_EXCHANGE
+        return self._events_exchange
 
     def _format_and_make_call(self, key, data, headers, response_key, method):
         formatted_data = _format_data_structure(data, headers, response_key)

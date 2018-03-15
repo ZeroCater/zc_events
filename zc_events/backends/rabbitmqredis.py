@@ -194,18 +194,27 @@ class RabbitMqFanoutBackend(object):
     """
 
     def __init__(self, redis_client=None, pika_pool=None):
-        if redis_client:
-            self._redis_client = redis_client
-        else:
-            pool = redis.ConnectionPool().from_url(settings.EVENTS_REDIS_URL, db=0)
-            self._redis_client = redis.Redis(connection_pool=pool)
+        self._redis_client = redis_client
+        self._pika_pool = pika_pool
+        self.__events_exchange = None
 
-        if pika_pool:
-            self._pika_pool = pika_pool
-        else:
+    @property
+    def _redis_client(self):
+        if not self.__redis_client:
+            pool = redis.ConnectionPool().from_url(settings.EVENTS_REDIS_URL, db=0)
+            self.__redis_client = redis.Redis(connection_pool=pool)
+        return self.__redis_client
+
+    @_redis_client.setter
+    def _redis_client(self, value):
+        self.__redis_client = value
+
+    @property
+    def _pika_pool(self):
+        if not self.__pika_pool:
             pika_params = pika.URLParameters(settings.BROKER_URL)
             pika_params.socket_timeout = 5
-            self._pika_pool = pika_pool_lib.QueuedPool(
+            self.__pika_pool = pika_pool_lib.QueuedPool(
                 create=lambda: pika.BlockingConnection(parameters=pika_params),
                 max_size=10,
                 max_overflow=10,
@@ -213,8 +222,17 @@ class RabbitMqFanoutBackend(object):
                 recycle=3600,
                 stale=45,
             )
+        return self.__pika_pool
 
-        self._events_exchange = settings.EVENTS_EXCHANGE
+    @_pika_pool.setter
+    def _pika_pool(self, value):
+        self.__pika_pool = value
+
+    @property
+    def _events_exchange(self):
+        if not self.__events_exchange:
+            self.__events_exchange = settings.EVENTS_EXCHANGE
+        return self.__events_exchange
 
     def call(self, key, data):
         return self.post(key, data)
