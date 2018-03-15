@@ -39,13 +39,13 @@ class _LazySettings(object):
         if not self._settings:
             import_path = os.environ.get('ZC_EVENTS_SETTINGS')
             if import_path:
-                logger.debug('zc_events could not use django settings, using ZC_EVENTS_SETTINGS')
+                logger.debug('zc_events is using ZC_EVENTS_SETTINGS path={path}'.format(path=import_path))
                 try:
                     self._settings = importlib.import_module(import_path)
-                except Exception as e:
+                except ImportError as e:
                     logger.exception(
                         'zc_events could not import settings. '
-                        'Did you forget to set ZC_EVENTS_SETTINGS? path={import_path}'.format(
+                        'The path was not valid. path={import_path}'.format(
                             import_path=import_path
                         )
                     )
@@ -53,6 +53,8 @@ class _LazySettings(object):
             elif django_settings:
                 logger.debug('zc_events is using django settings')
                 self._settings = django_settings
+            else:
+                raise RuntimeError('zc_events could not find valid settings. Please set ZC_EVENTS_SETTINGS')
         if hasattr(self._settings, name):
             return getattr(self._settings, name)
         else:
