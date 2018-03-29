@@ -321,12 +321,18 @@ class EventClient(object):
         Method to handle routing request event to appropriate view by constructing
         a request object based on the parameters of the event.
         """
+        body = None
+        try:
+            body = event['body']['data']
+        except KeyError:
+            pass
+
         request = create_django_request_object(
             roles=event.get('roles'),
             query_string=event.get('query_string'),
             method=event.get('method'),
             user_id=event.get('user_id', None),
-            body=event.get('body', None),
+            body=body,
             http_host=event.get('http_host', None)
         )
 
