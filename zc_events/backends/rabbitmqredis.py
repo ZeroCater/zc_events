@@ -14,8 +14,8 @@ _LOW_PRIORITY = 0
 _HIGH_PRIORITY = 9
 
 
-logger = logging.getLogger(__name__)
-
+#logger = logging.getLogger(__name__)
+logger = logging.getLogger('django')
 
 def _format_exception_response(exception_name, exception_msg, exception_trace):
     return {
