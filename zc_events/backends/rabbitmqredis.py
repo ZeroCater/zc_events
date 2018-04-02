@@ -13,9 +13,10 @@ _DEFAULT_ROUTING_KEY = ''
 _LOW_PRIORITY = 0
 _HIGH_PRIORITY = 9
 
+#logging.getLogger(__name__).addHandler(logging.NullHandler())
 
 logger = logging.getLogger(__name__)
-
+#logger = logging.getLogger('django')
 
 def _format_exception_response(exception_name, exception_msg, exception_trace):
     return {
@@ -54,7 +55,9 @@ def dispatch_task(name, data):
         name (str): The name of the function to be called.
         data (dict or None): The data to be used to populate the Request object.
     """
-    logger.info('zc_events received name={name} data={data}'.format(name=name, data=data))
+    import pdb
+    pdb.set_trace()
+    logger.warning('zc_events received name={name} data={data}'.format(name=name, data=data))
     request = Request(data)
     func = settings.JOB_MAPPING.get(name)
     if not func:
