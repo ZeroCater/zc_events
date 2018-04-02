@@ -13,9 +13,10 @@ _DEFAULT_ROUTING_KEY = ''
 _LOW_PRIORITY = 0
 _HIGH_PRIORITY = 9
 
+logging.getLogger(__name__).addHandler(logging.NullHandler())
 
-#logger = logging.getLogger(__name__)
-logger = logging.getLogger('django')
+logger = logging.getLogger(__name__)
+#logger = logging.getLogger('django')
 
 def _format_exception_response(exception_name, exception_msg, exception_trace):
     return {
