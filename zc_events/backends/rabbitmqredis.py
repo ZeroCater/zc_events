@@ -54,7 +54,7 @@ def dispatch_task(name, data):
         name (str): The name of the function to be called.
         data (dict or None): The data to be used to populate the Request object.
     """
-    logger.info('zc_events received name={name} data={data}'.format(name=name, data=data))
+    logger.warn('zc_events received name={name} data={data}'.format(name=name, data=data))
     request = Request(data)
     func = settings.JOB_MAPPING.get(name)
     if not func:
