@@ -13,7 +13,7 @@ _DEFAULT_ROUTING_KEY = ''
 _LOW_PRIORITY = 0
 _HIGH_PRIORITY = 9
 
-logging.getLogger(__name__).addHandler(logging.NullHandler())
+#logging.getLogger(__name__).addHandler(logging.NullHandler())
 
 logger = logging.getLogger(__name__)
 #logger = logging.getLogger('django')
