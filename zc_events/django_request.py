@@ -13,9 +13,18 @@ def structure_response(status, data):
 
 
 def create_django_request_object(roles, query_string, method, user_id=None, body=None, http_host=None):
-    """
-    Create a Django HTTPRequest object with the appropriate attributes pulled
-    from the event.
+    """Create a Django HTTPRequest object using JWT for auth.
+
+    Args:
+        roles: roles used to cosntruct the JWT for authorization.
+        qeuery_string: a query string like `?user=1`
+        method: A http verb like 'get'.
+        user_id: The id of the user making the request, used in the JWT.
+        body: Data passed to the request.
+        http_host: The DNS name of the requestor.
+
+    Returns:
+        HttpRequest object.
     """
     from django.http import HttpRequest, QueryDict
     from zc_common.jwt_auth.utils import jwt_encode_handler

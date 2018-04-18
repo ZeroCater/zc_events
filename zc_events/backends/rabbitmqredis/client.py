@@ -5,9 +5,10 @@ import pika_pool as pika_pool_lib
 import redis
 import traceback
 from zc_events.config import settings
-from zc_events.request import Request
 from zc_events.responses import Response
 from zc_events.exceptions import RequestTimeout
+from zc_events.backends.rabbitmqredis.common import format_exception_response
+from zc_events.backends.rabbitmqredis.server import respond
 
 _DEFAULT_ROUTING_KEY = ''
 _LOW_PRIORITY = 0
@@ -15,77 +16,6 @@ _HIGH_PRIORITY = 9
 
 
 logger = logging.getLogger(__name__)
-
-
-def _format_exception_response(exception_name, exception_msg, exception_trace):
-    return {
-        'data': None,
-        'has_errors': True,
-        'errors': [
-            {
-                'type': exception_name,
-                'message': exception_msg,
-                'trace': exception_trace
-            }
-        ]
-    }
-
-
-def dispatch_task(name, data):
-    """Dispatch the task for processing on the server side.
-
-    Example:
-        @app.task('microservice.event')
-        def listener(event_name, data):
-            from zc_events.backends import dispatch_task
-            return dispatch_task(event_name, data)
-
-
-    Note:
-        This function relies up `JOB_MAPPING` to be defined in your settings,
-        which is a dict with the key corresponding to a name and the value being
-        a function which will accept an `Request` paramater. If no name is found,
-        nothing happens with the request.
-
-        This function also needs the `RPC_BACKEND` setting to be instantiated
-        so it can use the `respond` method.
-
-    Args:
-        name (str): The name of the function to be called.
-        data (dict or None): The data to be used to populate the Request object.
-    """
-    logger.info('zc_events received name={name} data={data}'.format(name=name, data=data))
-    request = Request(data)
-    func = settings.JOB_MAPPING.get(name)
-    if not func:
-        logger.info('zc_events did not find name={name}'.format(name=name))
-        return (False, False)
-    else:
-        try:
-            response = {
-                'data': func(request),
-                'has_errors': False,
-                'errors': []
-            }
-        except Exception as e:
-            msg = str(e)
-            ex_type = e.__class__.__name__
-            trace = traceback.format_exc()
-            logger.exception(
-                'zc_events dispatched func threw an exception: name={name} data={data} '
-                'exception={ex} message={msg} trace={trace}'.format(
-                    name=name,
-                    data=data,
-                    ex=ex_type,
-                    msg=msg,
-                    trace=trace
-                )
-            )
-            response = _format_exception_response(ex_type, msg, trace)
-        backend = settings.RPC_BACKEND
-        logger.info('zc_events finished name={name} data={data} response={response}'.format(
-            name=name, data=data, response=response))
-        return (backend.respond(request.response_key, response), True)
 
 
 def _get_raw_response(redis_client, response_key):
@@ -112,7 +42,7 @@ def _get_raw_response(redis_client, response_key):
                 trace=trace
             )
         )
-        response = json.dumps(_format_exception_response(ex_type, msg, trace))
+        response = json.dumps(format_exception_response(ex_type, msg, trace))
     return response
 
 
@@ -120,12 +50,6 @@ def _get_response(redis_client, response_key):
     response = _get_raw_response(redis_client, response_key)
     json_response = json.loads(response)
     return Response(json_response)
-
-
-def _respond(redis_client, response_key, data):
-    result = redis_client.rpush(response_key, json.dumps(data))
-    redis_client.expire(response_key, 60)
-    return result
 
 
 def _place_on_queue(pika_pool, events_exchange, routing_key, priority, event_body):
@@ -302,6 +226,6 @@ class RabbitMqFanoutBackend(object):
             response_key=response_key, data=data
         ))
         if response_key:
-            _respond(self._redis_client, response_key, data)
+            respond(self._redis_client, response_key, data)
             return True
         return False

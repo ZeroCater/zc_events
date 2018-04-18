@@ -1,7 +1,7 @@
 import pytest
 import uuid
 from zc_events.backends import rabbitmq_dispatch_task, RabbitMqFanoutBackend
-from zc_events.backends.rabbitmqredis import _get_response
+from zc_events.backends.rabbitmqredis.client import _get_response
 
 
 class TestDispatchingEvents:
