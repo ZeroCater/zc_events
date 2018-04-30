@@ -357,6 +357,9 @@ class EventClient(object):
             body=event.get('body', None),
             http_host=event.get('http_host', None)
         )
+        print("create_django_request_object")
+        print(dir(request))
+        print(request.raw_body)
 
         if not any([view, viewset, relationship_viewset]):
             raise ImproperlyConfigured('handle_request_event must be passed either a view or viewset')

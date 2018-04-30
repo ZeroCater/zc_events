@@ -41,6 +41,8 @@ def create_django_request_object(roles, query_string, method, user_id=None, body
     # For Django REST Framework >= 3.4.7
     request._read_started = False
 
+    print("create_django_request_object")
+    print(body)
     if body:
         request.raw_body = body
 
