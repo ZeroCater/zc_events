@@ -7,6 +7,21 @@ services:
     image: rabbitmq:3-management
     ports:
       - 8080:15672
+  django_worker3:
+    build:
+      context: .
+      dockerfile: Dockerfile-django-py3
+    volumes:
+      - .:/code
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - DJANGO_SETTINGS_MODULE=example.settings
+      - ZC_EVENTS_SETTINGS=example.zc_events_settings
+      - C_FORCE_ROOT=1
+    depends_on:
+      - redis
+      - rabbitmq
+    command: bash -c "cd examples/django && celery -A example.celery worker --loglevel=info"
   worker3:
     build:
       context: .
@@ -37,7 +52,23 @@ services:
       - redis
       - rabbitmq
       - worker3
+      - django_worker3
     command: python3 examples/client_example.py
+  django_worker2:
+    build:
+      context: .
+      dockerfile: Dockerfile-django-py2
+    volumes:
+      - .:/code
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - DJANGO_SETTINGS_MODULE=example.settings
+      - ZC_EVENTS_SETTINGS=example.zc_events_settings
+      - C_FORCE_ROOT=1
+    depends_on:
+      - redis
+      - rabbitmq
+    command: bash -c "cd examples/django && celery -A example.celery worker --loglevel=info"
   worker2:
     build:
       context: .

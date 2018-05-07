@@ -7,7 +7,7 @@ The long term plan is to simplify this library as much as possible. This will be
 - [x] Add http verbs to `EventClient`
 - [x] Deprecate all other methods on `EventClient`, except `email` related ones.
 - [x] Decouple `EventClient` from any particular backend to send events.
-- [ ] Move over sending events through Django Rest Framework.
+- [x] Move over sending events through Django Rest Framework.
 - [ ] Move over sending specific `email` type of events.
 - [ ] Create a `celery` backend to stop placing things directly on rabbitmq, with sane defaults.
 - [ ] Major version change that removes deprecated methods and classes.

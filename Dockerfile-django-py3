@@ -1,0 +1,14 @@
+FROM python:3
+ENV PYTHONUNBUFFERED 1
+RUN apt update
+RUN apt install entr --yes
+RUN mkdir /code
+WORKDIR /code
+ADD . /code/
+RUN pip install -r requirements-dev.txt
+# Add django 1.11
+RUN pip install django==1.11
+RUN pip install djangorestframework==3.7.7
+RUN pip install djangorestframework-jsonapi==2.2.0
+RUN pip install djangorestframework-jwt==1.8.0
+RUN pip install django-filter==1.1.0
