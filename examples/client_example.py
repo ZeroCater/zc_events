@@ -66,3 +66,8 @@ assert wrapped.id == '-1'
 assert wrapped.answer == 3
 assert wrapped.method == 'POST'
 assert wrapped.type == 'AddView'
+
+# Demonstrate how to work with query strings in a GET type of request to APIView
+assert c.get('lookup_drf', headers={'query_string': 'x=1'}).data == {'data': 'y'}
+# Do the same, but expect an error response from the server
+assert c.get('lookup_drf', headers={'query_string': 'y=1'}).has_errors

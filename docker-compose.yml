@@ -99,5 +99,6 @@ services:
       - redis
       - rabbitmq
       - worker2
+      - django_worker2
     command: python examples/client_example.py
 
