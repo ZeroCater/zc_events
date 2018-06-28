@@ -1,4 +1,5 @@
-from rest_framework import serializers
+from rest_framework import serializers, status
+from rest_framework.views import APIView
 from rest_framework.viewsets import ViewSet
 from rest_framework.response import Response
 
@@ -45,3 +46,12 @@ class AddView(ViewSet):
 
     def destroy(self, request, pk=None):
         return self._add(request, pk=pk)
+
+
+class LookupView(APIView):
+
+    def get(self, request):
+        x = request.query_params.get('x')
+        return_value = 'y' if x else x
+        return_status = status.HTTP_200_OK if x else status.HTTP_400_BAD_REQUEST
+        return Response(return_value, status=return_status)

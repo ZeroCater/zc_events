@@ -1,11 +1,17 @@
 import logging
 import ujson as json
 import traceback
+import six
 from zc_events.config import settings
 from zc_events.request import Request
 from zc_events.exceptions import RequestTimeout
 from zc_events.backends.rabbitmqredis.common import format_exception_response
 from zc_events.backends.rabbitmqredis import viewset_handler
+
+if six.PY2:
+    from collections import Mapping
+else:
+    from collections.abc import Mapping
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +41,7 @@ def _handle_regular_func(func, data):
 
 def _get_job_info(name):
     val = settings.JOB_MAPPING.get(name)
-    if hasattr(val, 'get'):
+    if isinstance(val, Mapping):
         return val.get('func'), val.get('relationship_viewset')
     return val, None
 
