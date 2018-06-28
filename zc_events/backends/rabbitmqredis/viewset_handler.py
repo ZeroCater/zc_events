@@ -89,8 +89,10 @@ def _create_request(event):
 
 
 def _make_request_handler(event, func, relationship_viewset):
-    from rest_framework.viewsets import ViewSet
-    if issubclass(func, ViewSet):
+    # use ViewSetMixin because that is where the magic happens...
+    # https://github.com/encode/django-rest-framework/blob/73203e6b5920dcbe78e3309b7bf2803eb56db536/rest_framework/viewsets.py#L35
+    from rest_framework.viewsets import ViewSetMixin
+    if issubclass(func, ViewSetMixin):
         viewset = func
         view = None
     else:
