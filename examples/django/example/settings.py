@@ -193,3 +193,7 @@ JWT_AUTH = {
 }
 
 JSON_API_FORMAT_KEYS = 'camelize'
+
+# Used for sending emails
+AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
+AWS_SECRET_KEY_ID = os.environ.get('AWS_SECRET_ACCESS_KEY')
