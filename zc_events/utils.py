@@ -1,5 +1,6 @@
 import datetime
 import collections
+from six import text_type
 
 
 def _get_attr(model_instance, attr_name):
@@ -37,7 +38,7 @@ def model_to_dict(instance, included_attributes={}):
         if type(attr_value) in (datetime.date, datetime.datetime, datetime.time):
             attr_value = str(attr_value)
 
-        if type(attr_value) not in (type(None), int, int, float, bool, str, unicode, list, dict):
+        if type(attr_value) not in (type(None), int, int, float, bool, str, text_type, list, dict):
             raise TypeError('Unexpected value for {} attribute. I found {}'.format(attr_name, type(attr_value)))
 
         data.setdefault(name, attr_value)
