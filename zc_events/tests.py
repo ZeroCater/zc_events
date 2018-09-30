@@ -63,7 +63,7 @@ class GlobalIndexRebuildTestMixin(object):
 
         total_events = int(math.ceil(self.objects_count / self.default_batch_size))
 
-        for i in xrange(total_events):
+        for i in range(total_events):
             start_index = i * self.default_batch_size
             end_index = start_index + self.default_batch_size
 

@@ -49,7 +49,7 @@ class Response(object):
         errors (list of dicts): Holds the errors that were thrown, if any.
     """
     def __init__(self, response):
-        for key, value in response.items():
+        for key, value in list(response.items()):
             setattr(self, key, value)
 
 

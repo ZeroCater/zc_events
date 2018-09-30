@@ -1,10 +1,11 @@
 import datetime
+import collections
 
 
 def _get_attr(model_instance, attr_name):
     attr_value = getattr(model_instance, attr_name)
 
-    if callable(attr_value):
+    if isinstance(attr_value, collections.Callable):
         return attr_value()
     return attr_value
 
@@ -23,7 +24,7 @@ def model_to_dict(instance, included_attributes={}):
     """
     data = {}
 
-    for name, attr_name in included_attributes.iteritems():
+    for name, attr_name in included_attributes.items():
 
         attr_value = instance
         for attr in attr_name.split('.'):
@@ -36,7 +37,7 @@ def model_to_dict(instance, included_attributes={}):
         if type(attr_value) in (datetime.date, datetime.datetime, datetime.time):
             attr_value = str(attr_value)
 
-        if type(attr_value) not in (type(None), int, long, float, bool, str, unicode, list, dict):
+        if type(attr_value) not in (type(None), int, int, float, bool, str, unicode, list, dict):
             raise TypeError('Unexpected value for {} attribute. I found {}'.format(attr_name, type(attr_value)))
 
         data.setdefault(name, attr_value)
