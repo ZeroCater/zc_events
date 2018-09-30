@@ -53,19 +53,19 @@ class RemoteResourceWrapper(object):
     def create_properties_from_data(self, included):
         accepted_keys = ('id', 'type', 'self', 'related')
 
-        for key in self.data.keys():
+        for key in list(self.data.keys()):
             if key in accepted_keys:
                 setattr(self, key, self.data.get(key))
 
         if 'attributes' in self.data:
             attributes = self.data['attributes']
-            for key in attributes.keys():
+            for key in list(attributes.keys()):
                 setattr(self, underscore(key), attributes[key])
 
         if 'relationships' in self.data:
             relationships = self.data['relationships']
 
-            for key in relationships.keys():
+            for key in list(relationships.keys()):
                 if isinstance(relationships[key]['data'], list):
                     setattr(self, underscore(key), RemoteResourceListWrapper(relationships[key]['data'], included))
                 else:
@@ -103,5 +103,5 @@ class Request(object):
         id (str): An automatically generated unique request id.
     """
     def __init__(self, request):
-        for key, value in request.items():
+        for key, value in list(request.items()):
             setattr(self, key, value)
