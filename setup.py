@@ -32,7 +32,7 @@ setup(
         "Topic :: Internet :: WWW/HTTP",
     ],
     install_requires=[
-        'boto3==1.4.7',
+        'boto3>=1.4.7',
         'celery>=3.1.10,<4.0.0',
         'inflection>=0.3.1,<0.4',
         'pika>=0.10.0,<0.11.0',
