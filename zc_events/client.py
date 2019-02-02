@@ -344,7 +344,7 @@ class EventClient(object):
 
         return viewset.as_view(actions)
 
-    def handle_request_event(self, event, view=None, viewset=None, relationship_viewset=None):
+    def handle_request_event(self, event, view=None, viewset=None, relationship_viewset=None, user_lookup_function=None):
         """
         Method to handle routing request event to appropriate view by constructing
         a request object based on the parameters of the event.
@@ -355,7 +355,8 @@ class EventClient(object):
             method=event.get('method'),
             user_id=event.get('user_id', None),
             body=event.get('body', None),
-            http_host=event.get('http_host', None)
+            http_host=event.get('http_host', None),
+            user_lookup_function=user_lookup_function
         )
 
         if not any([view, viewset, relationship_viewset]):
