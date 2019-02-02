@@ -12,7 +12,8 @@ def structure_response(status, data):
     }).encode('utf-8'))
 
 
-def create_django_request_object(roles, query_string, method, user_id=None, body=None, http_host=None):
+def create_django_request_object(roles, query_string, method, user_id=None,
+                                 body=None, http_host=None, user_lookup_function=None):
     """Create a Django HTTPRequest object using JWT for auth.
 
     Args:
@@ -61,5 +62,8 @@ def create_django_request_object(roles, query_string, method, user_id=None, body
         'CONTENT_TYPE': 'application/vnd.api+json',
         'CONTENT_LENGTH': '99999',
     }
+
+    if user_lookup_function:
+        request.user = user_lookup_function(user_id)
 
     return request
