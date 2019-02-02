@@ -349,6 +349,7 @@ class EventClient(object):
         Method to handle routing request event to appropriate view by constructing
         a request object based on the parameters of the event.
         """
+        logger.warn('pre-create_django_request_object')
         request = create_django_request_object(
             roles=event.get('roles'),
             query_string=event.get('query_string'),
@@ -358,6 +359,7 @@ class EventClient(object):
             http_host=event.get('http_host', None),
             user_lookup_function=user_lookup_function
         )
+        logger.warn('post-create_django_request_object')
 
         if not any([view, viewset, relationship_viewset]):
             raise ImproperlyConfigured('handle_request_event must be passed either a view or viewset')
@@ -384,7 +386,9 @@ class EventClient(object):
         else:
             handler = self._get_handler_for_viewset(viewset, is_detail=False)
 
+        logger.warn('pre-handler')
         result = handler(request, **handler_kwargs)
+        logger.warn('post-handler')
 
         # Takes result and drops it into Redis with the key passed in the event
         self.redis_client.rpush(response_key, structure_response(result.status_code, result.rendered_content))
