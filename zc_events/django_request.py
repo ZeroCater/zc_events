@@ -69,7 +69,7 @@ def create_django_request_object(roles, query_string, method, user_id=None,
     logger.warn('pre check for user lookup function')
     if user_lookup_function:
         logger.warn('pre- user lookup func')
-        request.user = user_lookup_function(user_id)
+        request.auth_user = user_lookup_function(user_id)
         logger.warn('post- user lookup func')
 
     return request
