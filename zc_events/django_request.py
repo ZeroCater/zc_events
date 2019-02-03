@@ -1,6 +1,9 @@
 import ujson
 import zlib
+import logging
 
+
+logger = logging.getLogger('django')
 
 def structure_response(status, data):
     """
@@ -63,7 +66,10 @@ def create_django_request_object(roles, query_string, method, user_id=None,
         'CONTENT_LENGTH': '99999',
     }
 
+    logger.warn('pre check for user lookup function')
     if user_lookup_function:
+        logger.warn('pre- user lookup func')
         request.user = user_lookup_function(user_id)
+        logger.warn('post- user lookup func')
 
     return request
