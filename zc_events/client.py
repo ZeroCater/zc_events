@@ -386,7 +386,7 @@ class EventClient(object):
         else:
             handler = self._get_handler_for_viewset(viewset, is_detail=False)
 
-        logger.warn('pre-handler')
+        logger.warn('pre-handler({})'.format(handler.__name__))
         result = handler(request, **handler_kwargs)
         logger.warn('post-handler')
 
