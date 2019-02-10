@@ -369,6 +369,8 @@ class EventClient(object):
         handler_kwargs = {}
         if view:
             handler = view.as_view()
+            if pk:
+                handler_kwargs['pk'] = pk
         elif pk:
             handler_kwargs['pk'] = pk
             if relationship:
