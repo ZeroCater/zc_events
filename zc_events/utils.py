@@ -35,7 +35,7 @@ def model_to_dict(instance, included_attributes={}):
                 break
 
         # Ensure that attr_value is a native python datatype
-        if type(attr_value) in (datetime.date, datetime.datetime, datetime.time):
+        if isinstance(attr_value, (datetime.date, datetime.datetime, datetime.time)):
             attr_value = str(attr_value)
 
         if type(attr_value) not in (type(None), int, float, bool, str, text_type, bytes, list, dict):
