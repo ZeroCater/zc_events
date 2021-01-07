@@ -81,7 +81,7 @@ CELERY_ROUTES = ('zc_events.routers.TaskRouter', )
 
 ## BROKER_URL
 
-Make sure that the `BROKER_URL` either in ``.env.sample` or in `settings.py` if a default is defined there is in the following format. The old style of the trailing `//` won't work for development when emitting events.
+Make sure that the `BROKER_URL` either in `.env.sample` or in `settings.py` if a default is defined there is in the following format. The old style of the trailing `//` won't work for development when emitting events.
 
 ```
 BROKER_URL=amqp://guest:guest@rabbitmq:5672/%2F
