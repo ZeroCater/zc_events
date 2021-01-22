@@ -33,7 +33,7 @@ setup(
     ],
     install_requires=[
         'boto3>=1.4.7',
-        'celery>=3.1.10,<4.0.0',
+        'celery>=3.1.10',
         'inflection>=0.3.1,<0.4',
         'pika>=0.10.0,<0.11.0',
         'pika_pool>=0.1.3,<0.1.4',
