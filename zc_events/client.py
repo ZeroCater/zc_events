@@ -320,6 +320,10 @@ class EventClient(object):
         return self.emit_microservice_message(
             self.notifications_exchange, 'microservice.notification.text', event_type, *args, **kwargs)
 
+    def emit_microservice_push_notification(self, event_type, *args, **kwargs):
+        return self.emit_microservice_message(
+            self.notifications_exchange, 'microservice.notification.push', event_type, *args, **kwargs)
+
     def wait_for_response(self, response_key):
         response = self.redis_client.blpop(response_key, 60)
         return response

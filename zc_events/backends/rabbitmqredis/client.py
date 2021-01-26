@@ -4,6 +4,8 @@ import pika
 import pika_pool as pika_pool_lib
 import redis
 import traceback
+
+from zc_events.exceptions import EmitEventException
 from zc_events.config import settings
 from zc_events.responses import Response
 from zc_events.exceptions import RequestTimeout
