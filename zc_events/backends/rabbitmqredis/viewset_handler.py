@@ -1,5 +1,7 @@
 import ujson as json
 
+from zc_events.exceptions import ImproperlyConfigured
+
 
 def is_compatible(func):
     """Determine if the function is a compatible view or viewset

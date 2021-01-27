@@ -1,5 +1,5 @@
 try:
-    from django.core.exceptions import ImproperlyConfigured
+    from django.core.exceptions import ImproperlyConfigured  # pylint: disable=unused-import
 except ImportError:
     class ImproperlyConfigured(Exception):
         pass

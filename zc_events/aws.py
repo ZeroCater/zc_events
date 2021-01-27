@@ -1,4 +1,3 @@
-import sys
 import uuid
 import boto3
 from botocore.exceptions import ClientError
@@ -74,7 +73,7 @@ def read_s3_file_as_string(aws_bucket_name, content_key, delete=False,
         )
         s3 = session.resource('s3')
         obj = s3.Object(aws_bucket_name, content_key).get()
-        ouput = obj['Body'].read()
+        output = obj['Body'].read()
 
         if delete:
             obj.delete()

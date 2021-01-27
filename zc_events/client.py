@@ -260,7 +260,9 @@ class EventClient(object):
             key, data, headers, False, 'delete_no_wait'
         )
 
-    def emit_microservice_message(self, exchange, routing_key, event_type, priority=0, *args, **kwargs):
+    def emit_microservice_message(  # pylint: disable=keyword-arg-before-vararg
+        self, exchange, routing_key, event_type, priority=0, *args, **kwargs
+    ):
         _deprecated()
         task_id = str(uuid.uuid4())
 
