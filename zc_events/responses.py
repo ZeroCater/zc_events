@@ -4,11 +4,11 @@ from __future__ import (
 
 import inspect
 import ujson as json_module
-import re
 import six
 from six.moves import urllib
 
-from collections import namedtuple, Sequence, Sized
+from collections import namedtuple
+from collections.abc import Sequence, Sized
 from functools import update_wrapper
 from inflection import camelize
 
@@ -56,13 +56,13 @@ class Response(object):
 def get_wrapped(func, wrapper_template, evaldict):
     # Preserve the argspec for the wrapped function so that testing
     # tools such as pytest can continue to use their fixture injection.
-    args, a, kw, defaults = inspect.getargspec(func)
+    args, a, kw, defaults = inspect.getargspec(func)  # pylint: disable=deprecated-method
 
-    signature = inspect.formatargspec(args, a, kw, defaults)
+    signature = inspect.formatargspec(args, a, kw, defaults)  # pylint: disable=deprecated-method
     is_bound_method = hasattr(func, '__self__')
     if is_bound_method:
         args = args[1:]     # Omit 'self'
-    callargs = inspect.formatargspec(args, a, kw, None)
+    callargs = inspect.formatargspec(args, a, kw, None)  # pylint: disable=deprecated-method
 
     ctx = {'signature': signature, 'funcargs': callargs}
     six.exec_(wrapper_template % ctx, evaldict)
@@ -166,6 +166,7 @@ class EventRequestsMock(object):
         return get_wrapped(func, _wrapper_template, evaldict)
 
     def _find_match(self, resource_type, **kwargs):
+        found = None
         for match in self._events:
             if kwargs['method'] != match['method']:
                 continue
@@ -176,13 +177,14 @@ class EventRequestsMock(object):
             if not self._has_event_match(match, **kwargs):
                 continue
 
+            found = match
             break
         else:
             return None
         if self.assert_all_requests_are_fired:
             # for each found match remove the url from the stack
-            self._events.remove(match)
-        return match
+            self._events.remove(found)
+        return found
 
     def _has_event_match(self, match, **kwargs):
         pk = kwargs.get('id', None) or kwargs.get('pk', None)

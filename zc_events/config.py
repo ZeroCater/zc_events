@@ -13,7 +13,7 @@ Example:
 import logging
 import importlib
 import os
-import uuid
+
 try:
     from django.conf import settings as django_settings
 except ImportError:

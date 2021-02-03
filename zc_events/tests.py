@@ -37,7 +37,7 @@ class GlobalIndexRebuildTestMixin(object):
 
     def test_emitting_event_with_default_batch_size__pass(self, mock_save_string_contents_to_s3,
                                                           mock_emit_microservice_event):
-        self.resource_index_rebuild_task()
+        self.resource_index_rebuild_task()  # pylint: disable=not-callable
 
         events_count = int(math.ceil(self.objects_count / self.default_batch_size))
         self.assertEqual(mock_save_string_contents_to_s3.call_count, events_count)
@@ -45,7 +45,7 @@ class GlobalIndexRebuildTestMixin(object):
 
     def test_emitting_event_with_custom_batch_size__pass(self, mock_save_string_contents_to_s3,
                                                          mock_emit_microservice_event):
-        self.resource_index_rebuild_task(batch_size=self.custom_batch_size)
+        self.resource_index_rebuild_task(batch_size=self.custom_batch_size)  # pylint: disable=not-callable
 
         events_count = int(math.ceil(self.objects_count / self.custom_batch_size))
         self.assertEqual(mock_save_string_contents_to_s3.call_count, events_count)
@@ -56,7 +56,7 @@ class GlobalIndexRebuildTestMixin(object):
         s3_key = 'k'
         mock_save_string_contents_to_s3.side_effect = s3_key
 
-        self.resource_index_rebuild_task()
+        self.resource_index_rebuild_task()  # pylint: disable=not-callable
 
         data = []
         payloads = []

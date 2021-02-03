@@ -91,7 +91,7 @@ class RemoteResourceListWrapper(list):
         self.add_items_from_data(included)
 
     def add_items_from_data(self, included):
-        [self.append(RemoteResourceWrapper(x, included)) for x in self.data]
+        [self.append(RemoteResourceWrapper(x, included)) for x in self.data]  # pylint: disable=expression-not-assigned
 
 
 class Request(object):

@@ -4,7 +4,6 @@ import traceback
 import six
 from zc_events.config import settings
 from zc_events.request import Request
-from zc_events.exceptions import RequestTimeout
 from zc_events.backends.rabbitmqredis.common import format_exception_response
 from zc_events.backends.rabbitmqredis import viewset_handler
 
