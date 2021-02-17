@@ -498,6 +498,23 @@ class EventClient(object):
 
         self.emit_microservice_email_notification('send_email', **event_data)
 
+    def send_push_notification(self, *args, **kwargs):
+        push_uuid = uuid.uuid4()
+
+        canonical_user_id = kwargs.get('canonical_user_id')
+        title = kwargs.get('title')
+        body = kwargs.get('body')
+        application = kwargs.get('application')
+
+        if logger:
+            msg = (
+                f'MICROSERVICE_SEND_PUSH_NOTIFICATION: Send push notification with UUID {push_uuid}, '
+                f'User (canonical_user_id: {canonical_user_id}), Title: ({title}), Body: ({body}) '
+                f'via Application ({application})'
+            )
+
+        self.emit_microservice_push_notification('send_push_notification', **kwargs)
+
     def emit_index_rebuild_event(self, event_name, resource_type, model, batch_size, serializer, queryset=None):
         """
         A special helper method to emit events related to index_rebuilding.
