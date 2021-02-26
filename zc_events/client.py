@@ -506,12 +506,13 @@ class EventClient(object):
         title = kwargs.get('title')
         body = kwargs.get('body')
         application = kwargs.get('application')
+        message_data = kwargs.get('data')
 
         if logger:
             msg = (
                 f'MICROSERVICE_SEND_PUSH_NOTIFICATION: Send push notification with UUID {push_uuid}, '
                 f'User (canonical_user_id: {canonical_user_id}), Title: ({title}), Body: ({body}),  '
-                f'Type: ({notification_type}) via Application ({application})'
+                f'Type: ({notification_type}) with Data ({message_data}) via Application ({application})'
             )
 
         self.emit_microservice_push_notification('send_push_notification', **kwargs)

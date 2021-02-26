@@ -125,7 +125,7 @@ enable=abstract-class-instantiated,
        div-method,
        duplicate-argument-name,
        duplicate-bases,
-       duplicate-code,
+
        duplicate-except,
        duplicate-key,
        empty-docstring,
