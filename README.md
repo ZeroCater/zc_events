@@ -152,3 +152,8 @@ print 'Order name: {}'.format(order.name)
 ## Util functions
 
 You may need to save or read data from S3 as part of your event processing. In such cases, refer to `zc_events.aws.py` module. It contains a few helper functions to do common routines. 
+
+## Deployment
+
+ZeroCater employees can find
+instructions [here](https://github.com/ZeroCater/mp-planning/blob/master/devops/deploying_to_pypi.md).
