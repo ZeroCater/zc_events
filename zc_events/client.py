@@ -510,9 +510,9 @@ class EventClient(object):
 
         if logger:
             msg = (
-                f'MICROSERVICE_SEND_SLACK_NOTIFICATION: Send slack notification. '
-                f'User (multiuser_id: {canonical_user_id}), '
-                f'Type: ({notification_type}), Application ({application}), Data ({message_data})'
+                f'[MICROSERVICE_SEND_SLACK_NOTIFICATION] Send slack notification. '
+                f'User canonical_user_id={canonical_user_id}, '
+                f'notification_type={notification_type}, application={application}, data={message_data}'
             )
             logger.info(msg)
 
