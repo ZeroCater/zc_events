@@ -518,6 +518,21 @@ class EventClient(object):
 
         self.emit_microservice_slack_notification('send_slack_notification', **kwargs)
 
+    def forward_slack_notification(self, *args, **kwargs):
+        canonical_user_id = kwargs.get('canonical_user_id')
+        notification_type = kwargs.get('notification_type')
+        message_data = kwargs.get('data')
+
+        if logger:
+            msg = (
+                f'[MICROSERVICE_SEND_SLACK_NOTIFICATION] Send slack notification. '
+                f'User canonical_user_id={canonical_user_id}, '
+                f'notification_type={notification_type}, data={message_data}'
+            )
+            logger.info(msg)
+
+        self.emit_microservice_slack_notification('forward_slack_notification', **kwargs)
+
     def send_push_notification(self, *args, **kwargs):
         push_uuid = uuid.uuid4()
 
