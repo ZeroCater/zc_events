@@ -98,12 +98,13 @@ class EventClient(object):
             pika_params = pika.URLParameters(settings.BROKER_URL)
             pika_params.socket_timeout = 5
             self._pika_pool = pika_pool.QueuedPool(
+                # ccody - maybe we change these in tests?
                 create=lambda: pika.BlockingConnection(parameters=pika_params),
-                max_size=10,
-                max_overflow=10,
-                timeout=10,
-                recycle=3600,
-                stale=45,
+                max_size=20,
+                max_overflow=20,
+                timeout=20,
+                recycle=4800,
+                stale=90,
             )
         return self._pika_pool
 
@@ -277,7 +278,7 @@ class EventClient(object):
             'args': [event_type] + list(args),
             'kwargs': keyword_args
         }
-
+        # what is this even doing? this will only be correct in prod. .. it only declares
         event_queue_name = '{}-events'.format(settings.SERVICE_NAME)
         event_body = ujson.dumps(message)
 
