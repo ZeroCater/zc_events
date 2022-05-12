@@ -4,6 +4,8 @@ import logging
 import math
 import ujson
 import uuid
+
+from pika.exceptions import ChannelClosed
 from six.moves import urllib
 
 import pika
@@ -290,7 +292,10 @@ class EventClient(object):
             'x-max-priority': 10
         }
         with self.pika_pool.acquire() as cxn:
-            cxn.channel.queue_declare(queue=event_queue_name, durable=True, arguments=queue_arguments)
+            try:
+                cxn.channel.queue_declare(queue=event_queue_name, durable=True, arguments=queue_arguments)
+            except ChannelClosed as e:
+                logger.warning(f'Failed to declare queue. queue={event_queue_name} arguments={queue_arguments} ({e})')
             response = cxn.channel.basic_publish(
                 exchange,
                 routing_key,
@@ -526,7 +531,7 @@ class EventClient(object):
 
         if logger:
             msg = (
-                f'[MICROSERVICE_SEND_SLACK_NOTIFICATION] Send slack notification. '
+                f'[MICROSERVICE_FORWARD_SLACK_NOTIFICATION] Forward slack notification. '
                 f'User canonical_user_id={canonical_user_id}, '
                 f'notification_type={notification_type}, data={message_data}'
             )
@@ -550,6 +555,7 @@ class EventClient(object):
                 f'User (canonical_user_id: {canonical_user_id}), Title: ({title}), Body: ({body}),  '
                 f'Type: ({notification_type}) with Data ({message_data}) via Application ({application})'
             )
+            logger.info(msg)
 
         self.emit_microservice_push_notification('send_push_notification', **kwargs)
 

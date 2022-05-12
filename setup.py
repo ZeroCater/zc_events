@@ -40,7 +40,7 @@ setup(
         # https://zerocater-eng.atlassian.net/browse/MP-962
         # pika <= 0.11 cannot be used with Python 3.7+ due to `async` keyword being reserved
         'pika>=0.10.0,<=0.13.1',
-        'pika-pool @ git+https://github.com/codytowstik/pika-pool@b4915988e5f34bbeaecbc21a42398b098b334aa2#egg=pika-pool', # noqa
+        'pika-pool @ git+https://github.com/codytowstik/pika-pool@b4915988e5f34bbeaecbc21a42398b098b334aa2#egg=pika-pool',  # noqa
         'redis>=2.10.5,<=3.5.3',
 
         'ujson>=1.35,<1.36',
