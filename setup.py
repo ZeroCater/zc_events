@@ -42,9 +42,8 @@ setup(
         'pika>=0.11.0,<=1.3.2',
         'pika-pool @ git+https://github.com/ZeroCater/pika-pool@059e9e5cd3bd42d0cd7e376abd0d668f0faafc14#egg=pika-pool',  # noqa
         'redis>=2.10.5,<=3.5.3',
-
-        'ujson>=1.35,<1.36',
-        'zc_common @ git+https://github.com/ZeroCater/zc_common@640291425a587e5cf972f4850df2199d16ac9cf8#egg=zc_common',
+        'ujson>=5.6,<5.7',
+        'zc_common @ git+https://github.com/ZeroCater/zc_common@11254a427e02cb620d02d761fb7223760ad69c7e#egg=zc_common',
         'pyjwt>=1.4.0,<2.0.0',
         'six>=1.10.0'
     ]
