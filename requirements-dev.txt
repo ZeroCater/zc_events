@@ -3,5 +3,5 @@ django==1.9
 djangorestframework==3.3.3
 djangorestframework-jwt==1.9.0
 mock==2.0.0
-PyJWT==1.4.0
+PyJWT==2.4.0
 pytest==3.0.5
