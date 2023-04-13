@@ -89,7 +89,7 @@ class EventClient(object):
     def redis_client(self):
         if not self._redis_client:
             pool = redis.ConnectionPool().from_url(settings.EVENTS_REDIS_URL, db=0)
-            self._redis_client = redis.Redis(connection_pool=pool)
+            self._redis_client = redis.Redis(connection_pool=pool, ssl_cert_reqs=None)
         return self._redis_client
 
     @property
