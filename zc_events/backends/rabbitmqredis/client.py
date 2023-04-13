@@ -127,8 +127,8 @@ class RabbitMqFanoutBackend(object):
     @property
     def _redis_client(self):
         if not self.__redis_client:
-            pool = redis.ConnectionPool().from_url(settings.EVENTS_REDIS_URL, db=0)
-            self.__redis_client = redis.Redis(connection_pool=pool, ssl_cert_reqs=None)
+            pool = redis.ConnectionPool().from_url(settings.EVENTS_REDIS_URL, db=0, ssl_cert_reqs=None)
+            self.__redis_client = redis.Redis(connection_pool=pool)
         return self.__redis_client
 
     @_redis_client.setter
