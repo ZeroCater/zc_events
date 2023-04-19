@@ -1,4 +1,6 @@
 import logging
+from urllib.parse import urlparse
+
 import ujson as json
 import pika
 import pika_pool as pika_pool_lib
@@ -127,7 +129,12 @@ class RabbitMqFanoutBackend(object):
     @property
     def _redis_client(self):
         if not self.__redis_client:
-            pool = redis.ConnectionPool().from_url(settings.EVENTS_REDIS_URL, db=0, ssl_cert_reqs=None)
+            redis_connection_kwargs = {'db': 0}
+            url = urlparse(settings.REDIS_URL)
+            if url.scheme == 'rediss':
+                redis_connection_kwargs['ssl_cert_reqs'] = None
+
+            pool = redis.ConnectionPool().from_url(settings.REDIS_URL, **redis_connection_kwargs)
             self.__redis_client = redis.Redis(connection_pool=pool)
         return self.__redis_client
 

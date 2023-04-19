@@ -2,6 +2,8 @@ from __future__ import division
 
 import logging
 import math
+from urllib.parse import urlparse
+
 import ujson
 import uuid
 
@@ -90,7 +92,12 @@ class EventClient(object):
     @property
     def redis_client(self):
         if not self._redis_client:
-            pool = redis.ConnectionPool().from_url(settings.EVENTS_REDIS_URL, db=0, ssl_cert_reqs=None)
+            redis_connection_kwargs = {'db': 0}
+            url = urlparse(settings.REDIS_URL)
+            if url.scheme == 'rediss':
+                redis_connection_kwargs['ssl_cert_reqs'] = None
+
+            pool = redis.ConnectionPool().from_url(settings.REDIS_URL, **redis_connection_kwargs)
             self._redis_client = redis.Redis(connection_pool=pool)
         return self._redis_client
 
