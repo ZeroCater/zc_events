@@ -7,7 +7,7 @@ from urllib.parse import urlparse
 import ujson
 import uuid
 
-from pika.exceptions import ChannelClosed
+from pika.exceptions import ChannelClosed, UnroutableError, NackError
 from six.moves import urllib
 
 import pika
@@ -296,27 +296,25 @@ class EventClient(object):
         queue_arguments = {
             'x-max-priority': 10
         }
-        with self.pika_pool.acquire() as cxn:
-            try:
+        try:
+            with self.pika_pool.acquire() as cxn:
                 cxn.channel.queue_declare(queue=event_queue_name, durable=True, arguments=queue_arguments)
-            except ChannelClosed as e:
-                logger.warning(f'Failed to declare queue. queue={event_queue_name} arguments={queue_arguments} ({e})')
-            response = cxn.channel.basic_publish(
-                exchange,
-                routing_key,
-                event_body,
-                pika.BasicProperties(
-                    content_type='application/json',
-                    content_encoding='utf-8',
-                    priority=priority
+                response = cxn.channel.basic_publish(
+                    exchange,
+                    routing_key,
+                    event_body,
+                    pika.BasicProperties(
+                        content_type='application/json',
+                        content_encoding='utf-8',
+                        priority=priority
+                    )
                 )
-            )
 
-        if not response:
+        except (UnroutableError, NackError) as e:
             logger.info(
-                '''{}::EMIT_FAILURE: Failure emitting [{}:{}] event for object ({}:{}) and user {}'''.format(
+                '''{}::EMIT_FAILURE: Failure emitting [{}:{}] event for object ({}:{}) and user {}: {}'''.format(
                     exchange.upper(), event_type, task_id, kwargs.get('resource_type'),
-                    kwargs.get('resource_id'), kwargs.get('user_id')))
+                    kwargs.get('resource_id'), kwargs.get('user_id'), str(e)))
             raise EmitEventException("Message may have failed to deliver")
 
         return response
