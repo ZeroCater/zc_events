@@ -7,7 +7,7 @@ from urllib.parse import urlparse
 import ujson
 import uuid
 
-from pika.exceptions import ChannelClosed, UnroutableError, NackError
+from pika.exceptions import UnroutableError, NackError
 from six.moves import urllib
 
 import pika
