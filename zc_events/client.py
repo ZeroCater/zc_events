@@ -93,11 +93,11 @@ class EventClient(object):
     def redis_client(self):
         if not self._redis_client:
             redis_connection_kwargs = {'db': 0}
-            url = urlparse(settings.REDIS_URL)
-            if url.scheme == 'rediss':
+            url_obj = urlparse(settings.EVENTS_REDIS_URL)
+            if url_obj.scheme == 'rediss':
                 redis_connection_kwargs['ssl_cert_reqs'] = None
 
-            pool = redis.ConnectionPool().from_url(settings.REDIS_URL, **redis_connection_kwargs)
+            pool = redis.ConnectionPool().from_url(settings.EVENTS_REDIS_URL, **redis_connection_kwargs)
             self._redis_client = redis.Redis(connection_pool=pool)
         return self._redis_client
 
