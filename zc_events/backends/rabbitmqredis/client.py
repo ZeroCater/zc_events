@@ -130,11 +130,11 @@ class RabbitMqFanoutBackend(object):
     def _redis_client(self):
         if not self.__redis_client:
             redis_connection_kwargs = {'db': 0}
-            url = urlparse(settings.REDIS_URL)
+            url = urlparse(settings.EVENTS_REDIS_URL)
             if url.scheme == 'rediss':
                 redis_connection_kwargs['ssl_cert_reqs'] = None
 
-            pool = redis.ConnectionPool().from_url(settings.REDIS_URL, **redis_connection_kwargs)
+            pool = redis.ConnectionPool().from_url(settings.EVENTS_REDIS_URL, **redis_connection_kwargs)
             self.__redis_client = redis.Redis(connection_pool=pool)
         return self.__redis_client
 
