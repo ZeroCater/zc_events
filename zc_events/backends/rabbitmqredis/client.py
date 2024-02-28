@@ -3,6 +3,7 @@ from urllib.parse import urlparse
 
 import ujson as json
 import pika
+from pika.exceptions import UnroutableError, NackError
 import pika_pool as pika_pool_lib
 import redis
 import traceback
@@ -69,21 +70,25 @@ def _place_on_queue(pika_pool, events_exchange, routing_key, priority, event_bod
            events_exchange=events_exchange, routing_key=routing_key, event_body=event_body, priority=priority
         )
     )
-    with pika_pool.acquire() as cxn:
-        cxn.channel.queue_declare(queue=event_queue_name, durable=True, arguments=queue_arguments)
-        response = cxn.channel.basic_publish(
-            events_exchange,
-            routing_key,
-            event_body,
-            pika.BasicProperties(
-                content_type='application/json',
-                content_encoding='utf-8',
-                priority=priority
+    try:
+        with pika_pool.acquire() as cxn:
+            cxn.channel.queue_declare(queue=event_queue_name, durable=True, arguments=queue_arguments)
+            response = cxn.channel.basic_publish(
+                events_exchange,
+                routing_key,
+                event_body,
+                pika.BasicProperties(
+                    content_type='application/json',
+                    content_encoding='utf-8',
+                    priority=priority
+                )
             )
+    except (UnroutableError, NackError) as e:
+        logger.info(
+            f"{events_exchange.upper()}::EMIT_FAILURE: Failure emitting [{routing_key}:{event_body}]. ({e})"
         )
-
-    if not response:
         raise EmitEventException("Message may have failed to deliver")
+
     return response
 
 
