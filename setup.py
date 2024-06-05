@@ -34,7 +34,7 @@ setup(
     install_requires=[
         'boto3>=1.4.7',
         'celery>=3.1.10',
-        'inflection>=0.3.1,<0.4',
+        'inflection>=0.3.1,<=0.5',
         # These changes mirror the workaround we used to fix py-gateway builds
         # https://github.com/ZeroCater/zc_events/compare/ctowstik/mp-962-pika-zc-events
         # https://zerocater-eng.atlassian.net/browse/MP-962
@@ -44,7 +44,7 @@ setup(
         'redis>=2.10.5,<=3.5.3',
 
         'ujson>=1.35,<1.36',
-        'zc_common @ git+https://github.com/ZeroCater/zc_common@640291425a587e5cf972f4850df2199d16ac9cf8#egg=zc_common',
+        'zc_common>=0.4.18',
         'pyjwt>=1.4.0,<2.0.0',
         'six>=1.10.0'
     ]
