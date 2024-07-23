@@ -68,7 +68,7 @@ def dispatch_task(name, data):
         name (str): The name of the function to be called.
         data (dict or None): The data to be used to populate the Request object.
     """
-    logger.info('zc_events received name={name} data={data}'.format(name=name, data=data))
+    logger.debug('zc_events received name={name} data={data}'.format(name=name, data=data))
     func, relationship_viewset = _get_job_info(name)
     if not func:
         logger.info('zc_events did not find name={name}'.format(name=name))
