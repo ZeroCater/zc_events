@@ -99,6 +99,6 @@ def dispatch_task(name, data):
             )
             response = format_exception_response(ex_type, msg, trace)
         backend = settings.RPC_BACKEND
-        logger.info('zc_events finished name={name} data={data} response={response}'.format(
+        logger.debug('zc_events finished name={name} data={data} response={response}'.format(
             name=name, data=data, response=response))
         return (backend.respond(data.get('response_key'), response), True)
