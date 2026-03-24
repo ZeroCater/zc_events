@@ -43,7 +43,7 @@ setup(
         'pika-pool @ git+https://github.com/ZeroCater/pika-pool@059e9e5cd3bd42d0cd7e376abd0d668f0faafc14#egg=pika-pool',  # noqa
         'redis>=2.10.5,<=3.5.3',
 
-        'ujson>=1.35,<1.36',
+        'ujson>=1.35',
         'zc_common>=0.4.18',
         'pyjwt>=1.4.0,<2.0.0',
         'six>=1.10.0'
