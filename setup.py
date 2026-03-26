@@ -41,7 +41,7 @@ setup(
         # pika <= 0.11 cannot be used with Python 3.7+ due to `async` keyword being reserved
         'pika>=0.11.0,<=1.3.2',
         'pika-pool @ git+https://github.com/ZeroCater/pika-pool@059e9e5cd3bd42d0cd7e376abd0d668f0faafc14#egg=pika-pool',  # noqa
-        'redis>=2.10.5,<=3.5.3',
+        'redis>=2.10.5',
 
         'ujson>=1.35',
         'zc_common>=0.4.18',
