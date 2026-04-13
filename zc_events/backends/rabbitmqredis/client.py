@@ -57,7 +57,7 @@ def _get_response(redis_client, response_key):
     return Response(json_response)
 
 
-def _place_on_queue(pika_pool, events_exchange, routing_key, priority, event_body):
+def _place_on_queue(pika_pool, events_exchange, routing_key, priority, event_body, task_id, task_name, argsrepr):
     event_queue_name = '{}-events'.format(settings.SERVICE_NAME)
     queue_arguments = {
         'x-max-priority': 10
@@ -80,7 +80,21 @@ def _place_on_queue(pika_pool, events_exchange, routing_key, priority, event_bod
                 pika.BasicProperties(
                     content_type='application/json',
                     content_encoding='utf-8',
-                    priority=priority
+                    priority=priority,
+                    correlation_id=task_id,
+                    headers={
+                        'lang': 'py',
+                        'task': task_name,
+                        'id': task_id,
+                        'root_id': task_id,
+                        'parent_id': None,
+                        'group': None,
+                        'retries': 0,
+                        'timelimit': [None, None],
+                        'origin': '',
+                        'argsrepr': argsrepr,
+                        'kwargsrepr': '{}',
+                    }
                 )
             )
     except (UnroutableError, NackError) as e:
@@ -98,12 +112,13 @@ def _format_data(data, method, key):
         'method': method,
         'key': key
     }
-    return {
-        'task': 'microservice.event',
-        'id': data['id'],
-        'args': [key, data],
-        'response_key': data['response_key']
-    }
+    task_id = data['id']
+    task_name = 'microservice.event'
+    args = [key, data]
+    kwargs = {}
+    embed = {'callbacks': None, 'errbacks': None, 'chain': None, 'chord': None}
+    body = (args, kwargs, embed)
+    return body, task_id, task_name
 
 
 class RabbitMqFanoutBackend(object):
@@ -179,51 +194,63 @@ class RabbitMqFanoutBackend(object):
         return self.post_no_wait(key, data)
 
     def get(self, key, data):
-        data = _format_data(data, 'GET', key)
-        return self._enqueue_with_waiting(data)
+        response_key = data['response_key']
+        body, task_id, task_name = _format_data(data, 'GET', key)
+        return self._enqueue_with_waiting(body, task_id, task_name, response_key)
 
     def put(self, key, data):
-        data = _format_data(data, 'PUT', key)
-        return self._enqueue_with_waiting(data)
+        response_key = data['response_key']
+        body, task_id, task_name = _format_data(data, 'PUT', key)
+        return self._enqueue_with_waiting(body, task_id, task_name, response_key)
 
     def put_no_wait(self, key, data):
-        data = _format_data(data, 'PUT', key)
-        return self._enqueue_without_waiting(data)
+        body, task_id, task_name = _format_data(data, 'PUT', key)
+        return self._enqueue_without_waiting(body, task_id, task_name)
 
     def post(self, key, data):
-        data = _format_data(data, 'POST', key)
-        return self._enqueue_with_waiting(data)
+        response_key = data['response_key']
+        body, task_id, task_name = _format_data(data, 'POST', key)
+        return self._enqueue_with_waiting(body, task_id, task_name, response_key)
 
     def post_no_wait(self, key, data):
-        data = _format_data(data, 'POST', key)
-        return self._enqueue_without_waiting(data)
+        body, task_id, task_name = _format_data(data, 'POST', key)
+        return self._enqueue_without_waiting(body, task_id, task_name)
 
     def delete(self, key, data):
-        data = _format_data(data, 'DELETE', key)
-        return self._enqueue_with_waiting(data)
+        response_key = data['response_key']
+        body, task_id, task_name = _format_data(data, 'DELETE', key)
+        return self._enqueue_with_waiting(body, task_id, task_name, response_key)
 
     def delete_no_wait(self, key, data):
-        data = _format_data(data, 'DELETE', key)
-        return self._enqueue_without_waiting(data)
+        body, task_id, task_name = _format_data(data, 'DELETE', key)
+        return self._enqueue_without_waiting(body, task_id, task_name)
 
-    def _enqueue_without_waiting(self, data):
+    def _enqueue_without_waiting(self, body, task_id, task_name):
+        argsrepr = repr(body[0])
         _place_on_queue(
             self._pika_pool,
             self._events_exchange,
             _DEFAULT_ROUTING_KEY,
             _LOW_PRIORITY,
-            json.dumps(data)
+            json.dumps(body),
+            task_id,
+            task_name,
+            argsrepr
         )
 
-    def _enqueue_with_waiting(self, data):
+    def _enqueue_with_waiting(self, body, task_id, task_name, response_key):
+        argsrepr = repr(body[0])
         _place_on_queue(
             self._pika_pool,
             self._events_exchange,
             _DEFAULT_ROUTING_KEY,
             _HIGH_PRIORITY,
-            json.dumps(data)
+            json.dumps(body),
+            task_id,
+            task_name,
+            argsrepr
         )
-        return _get_response(self._redis_client, data['response_key'])
+        return _get_response(self._redis_client, response_key)
 
     def respond(self, response_key, data):
         """
