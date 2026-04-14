@@ -165,7 +165,8 @@ class RabbitMqFanoutBackend(object):
     @property
     def _pika_pool(self):
         if not self.__pika_pool:
-            pika_params = pika.URLParameters(settings.BROKER_URL)
+            broker_url = getattr(settings, 'CELERY_BROKER_URL', None) or settings.BROKER_URL
+            pika_params = pika.URLParameters(broker_url)
             pika_params.socket_timeout = 5
             self.__pika_pool = pika_pool_lib.QueuedPool(
                 create=lambda: pika.BlockingConnection(parameters=pika_params),
