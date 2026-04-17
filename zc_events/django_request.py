@@ -6,6 +6,9 @@ def structure_response(status, data):
     """
     Compress a JSON object with zlib for inserting into redis.
     """
+    # Decode bytes to str for ujson 5.x compatibility (rendered_content from DRF is bytes)
+    if isinstance(data, bytes):
+        data = data.decode('utf-8')
     return zlib.compress(ujson.dumps({
         'status': status,
         'body': data

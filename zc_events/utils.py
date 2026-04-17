@@ -1,12 +1,12 @@
 import datetime
-import collections
+import collections.abc
 from six import text_type
 
 
 def _get_attr(model_instance, attr_name):
     attr_value = getattr(model_instance, attr_name)
 
-    if isinstance(attr_value, collections.Callable):
+    if isinstance(attr_value, collections.abc.Callable):
         return attr_value()
     return attr_value
 

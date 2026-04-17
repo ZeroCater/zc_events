@@ -104,7 +104,8 @@ class EventClient(object):
     @property
     def pika_pool(self):
         if not self._pika_pool:
-            pika_params = pika.URLParameters(settings.BROKER_URL)
+            broker_url = getattr(settings, 'CELERY_BROKER_URL', None) or settings.BROKER_URL
+            pika_params = pika.URLParameters(broker_url)
             pika_params.socket_timeout = 5
             self._pika_pool = pika_pool.QueuedPool(
                 create=lambda: pika.BlockingConnection(parameters=pika_params),
